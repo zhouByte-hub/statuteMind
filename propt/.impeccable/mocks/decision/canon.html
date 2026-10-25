@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>statuteMind · 法规智能引擎 — 行为判断</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--ink:#111827;--blue:#2563eb;--line:rgba(17,24,39,.08);--t2:rgba(17,24,39,.6);--t3:rgba(17,24,39,.45)}
+body{width:1440px;height:900px;margin:0 auto;overflow:hidden;display:flex;flex-direction:column;background:#f3f4f6;color:var(--ink);font-family:'Noto Sans SC','PingFang SC',sans-serif;-webkit-font-smoothing:antialiased}
+svg{display:block;flex:none}
+.ic{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+/* 顶栏 */
+.top{flex:none;height:64px;background:#1e3a8a;display:flex;align-items:center;gap:32px;padding:0 32px;color:#fff}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700}
+.brand b{font-size:16px;font-weight:700;letter-spacing:.2px}
+.brand span{font-size:12px;color:rgba(255,255,255,.55);border-left:1px solid rgba(255,255,255,.18);padding-left:12px}
+.nav{display:flex;height:100%}
+.nav a{position:relative;display:flex;align-items:center;padding:0 16px;font-size:14px;color:rgba(255,255,255,.6);text-decoration:none}
+.nav a:hover{color:rgba(255,255,255,.85)}
+.nav .on{color:#fff;font-weight:500}
+.nav .on::after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:2px;border-radius:2px 2px 0 0;background:#93c5fd}
+.pill{margin-left:auto;display:flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);font-size:12px;color:rgba(255,255,255,.8)}
+.pill .ic{width:14px;height:14px}
+/* 搜索区 */
+.find{flex:none;background:#fff;border-bottom:1px solid var(--line);padding:24px 0 28px}
+.tabs{display:flex;gap:4px;width:max-content;margin:0 auto 16px;padding:4px;background:#f3f4f6;border-radius:8px}
+.tabs span{display:flex;align-items:center;height:32px;padding:0 24px;border-radius:4px;font-size:14px;color:var(--t2)}
+.tabs .on{background:var(--blue);color:#fff;font-weight:500;box-shadow:0 1px 2px rgba(37,99,235,.35)}
+.bar{display:flex;align-items:center;gap:12px;width:880px;height:56px;margin:0 auto;padding:0 8px 0 24px;background:#fff;border:1px solid rgba(17,24,39,.12);border-radius:8px;box-shadow:0 1px 2px rgba(17,24,39,.04),0 8px 24px rgba(17,24,39,.06)}
+.mag{width:20px;height:20px;color:var(--blue);stroke-width:2}
+.q{flex:1;font-size:16px;font-weight:500}
+.kbd{padding:4px 8px;border:1px solid rgba(17,24,39,.12);border-radius:4px;font-size:12px;line-height:1;color:rgba(17,24,39,.35)}
+.btn{display:flex;align-items:center;gap:8px;height:40px;padding:0 24px;border:0;border-radius:8px;background:var(--blue);color:#fff;font:500 14px/1 'Noto Sans SC',sans-serif;cursor:pointer}
+.btn:hover{background:#1d4ed8}
+/* 结果区 */
+.res{flex:none;width:1152px;margin:0 auto;display:flex;align-items:flex-start;gap:24px;padding:24px 0 8px}
+.lcol{flex:1;min-width:0}
+.meta{display:flex;align-items:baseline;margin-bottom:16px;font-size:12px;color:var(--t3)}
+.meta b{font-size:14px;font-weight:700;color:var(--ink);margin-right:8px}
+.meta span{margin-left:auto;display:inline-flex;align-items:center;gap:4px}
+.meta .ic{width:12px;height:12px}
+.list{display:flex;flex-direction:column;gap:16px}
+.lc{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px 24px;box-shadow:0 1px 2px rgba(17,24,39,.04)}
+.lc-top{display:flex;align-items:center;gap:12px}
+.badge{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:4px;background:#eff6ff;color:var(--blue);font-size:12px;font-weight:500}
+.lc-top h3{font-size:15px;font-weight:700}
+.ex{display:inline-flex;align-items:center;height:20px;padding:0 6px;border-radius:4px;background:#f3f4f6;font-size:11px;color:var(--t3)}
+.fav{margin-left:auto;width:32px;height:32px;border:0;border-radius:8px;background:none;display:flex;align-items:center;justify-content:center;color:rgba(17,24,39,.3);cursor:pointer}
+.fav .ic{width:18px;height:18px}
+.fav:hover{background:#f3f4f6;color:var(--t2)}
+.fav.on{color:var(--blue)}
+.fav.on .ic{fill:var(--blue)}
+.quote{margin:12px 0;font-size:14px;line-height:24px;color:rgba(17,24,39,.85)}
+.lc-foot{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t3)}
+.rel{width:64px;height:4px;border-radius:2px;background:rgba(17,24,39,.08);overflow:hidden}
+.rel i{display:block;height:100%;background:var(--blue);border-radius:2px}
+.rel-num{color:var(--blue);font-weight:700}
+.lnk{margin-left:auto;display:inline-flex;align-items:center;gap:4px;color:var(--blue);font-size:12px;font-weight:500;text-decoration:none}
+.lnk .ic{width:12px;height:12px}
+/* AI 判断卡 */
+.ai{flex:none;width:384px;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 1px 2px rgba(17,24,39,.04);overflow:hidden}
+.ai-head{display:flex;align-items:center;gap:10px;padding:16px 24px;background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff}
+.ai-head .ic{width:20px;height:20px}
+.ai-head b{font-size:16px;font-weight:700}
+.ai-head span{margin-left:auto;padding:4px 8px;border-radius:4px;background:rgba(255,255,255,.14);font-size:11px;color:rgba(255,255,255,.78)}
+.ai-body{padding:4px 24px 8px}
+.row{display:flex;gap:12px;padding:16px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.ric{flex:none;width:32px;height:32px;border-radius:8px;background:#eff6ff;color:var(--blue);display:flex;align-items:center;justify-content:center}
+.ric .ic{width:16px;height:16px}
+.rw b{display:block;margin-bottom:4px;font-size:12px;font-weight:500;color:var(--t3)}
+.rw p{font-size:14px;line-height:22px;font-weight:500}
+.rw em{font-style:normal;margin-left:6px;padding:2px 6px;border-radius:4px;background:#eff6ff;color:var(--blue);font-size:12px;font-weight:500}
+.rw a{color:var(--blue);font-weight:700;text-decoration:none}
+.rw span{display:block;margin-top:4px;font-size:12px;line-height:20px;font-weight:400;color:var(--t3)}
+.risk{border-bottom:0;background:#fef2f2;border-radius:8px;padding:12px;border:1px solid rgba(220,38,38,.1)}
+.risk .ric{background:rgba(220,38,38,.08);color:#dc2626}
+.risk .rw b{color:#dc2626}
+.ai-foot{margin-top:auto;display:flex;gap:12px;padding:16px 24px;border-top:1px solid var(--line)}
+.grow{flex:1;justify-content:center}
+.btn2{height:40px;padding:0 16px;border:1px solid rgba(17,24,39,.12);border-radius:8px;background:#fff;color:var(--t2);font:500 14px/1 'Noto Sans SC',sans-serif;cursor:pointer}
+/* 免责 */
+.foot{flex:none;height:48px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px;color:var(--t3)}
+.foot .ic{width:12px;height:12px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo">§</span><b>statuteMind</b><span>法规智能引擎</span></div>
+  <nav class="nav"><a class="on" href="#">法条检索</a><a href="#">行为判断</a><a href="#">知识库</a></nav>
+  <div class="pill"><svg class="ic" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="7.5" ry="3"/><path d="M4.5 5.5v13c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-13M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/></svg>演示数据 · 内置 1,286 条法条</div>
+</header>
+<section class="find">
+  <div class="tabs"><span>法条检索</span><span class="on">行为判断</span><span>知识库</span></div>
+  <div class="bar"><svg class="ic mag" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="q">公司拖欠工资 3 个月怎么办</span><span class="kbd">/</span><button class="btn">开始判断</button></div>
+</section>
+<main class="res">
+  <div class="lcol">
+    <div class="meta"><b>行为判断</b>命中 3 条相关法条<span>按相关度排序<svg class="ic" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></div>
+    <div class="list">
+      <article class="lc">
+        <div class="lc-top"><span class="badge">劳动合同法</span><h3>第三十条</h3><button class="fav on" aria-label="已收藏"><svg class="ic" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.4 5.9.9-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.8l5.9-.9z"/></svg></button></div>
+        <p class="quote">「用人单位应当按照劳动合同约定和国家规定，向劳动者及时足额支付劳动报酬。」</p>
+        <div class="lc-foot"><span>相关度</span><span class="rel"><i style="width:98%"></i></span><span class="rel-num">98%</span><a class="lnk" href="#">查看完整条文<svg class="ic" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></a></div>
+      </article>
+      <article class="lc">
+        <div class="lc-top"><span class="badge">劳动合同法</span><h3>第八十五条</h3><span class="ex">节引</span><button class="fav" aria-label="收藏"><svg class="ic" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.4 5.9.9-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.8l5.9-.9z"/></svg></button></div>
+        <p class="quote">「由劳动行政部门责令限期支付劳动报酬……逾期不支付的，责令按应付金额百分之五十以上百分之一百以下的标准向劳动者加付赔偿金。」</p>
+        <div class="lc-foot"><span>相关度</span><span class="rel"><i style="width:95%"></i></span><span class="rel-num">95%</span><a class="lnk" href="#">查看完整条文<svg class="ic" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></a></div>
+      </article>
+      <article class="lc">
+        <div class="lc-top"><span class="badge">劳动保障监察条例</span><h3>第二十六条</h3><span class="ex">节引</span><button class="fav" aria-label="收藏"><svg class="ic" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.4 5.9.9-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.8l5.9-.9z"/></svg></button></div>
+        <p class="quote">「用人单位有下列行为之一的，由劳动保障行政部门责令限期支付劳动报酬……」</p>
+        <div class="lc-foot"><span>相关度</span><span class="rel"><i style="width:88%"></i></span><span class="rel-num">88%</span><a class="lnk" href="#">查看完整条文<svg class="ic" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></a></div>
+      </article>
+    </div>
+  </div>
+  <aside class="ai">
+    <div class="ai-head"><svg class="ic" viewBox="0 0 24 24"><path d="M11 4l1.7 4.8 4.8 1.7-4.8 1.7L11 17l-1.7-4.8L4.5 10.5l4.8-1.7z"/><path d="M18.5 15.5v4m-2-2h4"/></svg><b>AI 法律判断</b><span>基于 3 条条文</span></div>
+    <div class="ai-body">
+      <div class="row"><span class="ric"><svg class="ic" viewBox="0 0 24 24"><path d="M3.5 11V5.5a2 2 0 0 1 2-2H11l9.5 9.5L13 20.5z"/><circle cx="8" cy="8" r="1.2"/></svg></span><div class="rw"><b>行为定性</b><p>拖欠劳动报酬<em>无故拖欠</em></p></div></div>
+      <div class="row"><span class="ric"><svg class="ic" viewBox="0 0 24 24"><path d="M6.5 3.5h8l4 4v13h-12zM14.5 3.5v4h4M9.5 12.5h5M9.5 16h5"/></svg></span><div class="rw"><b>法律责任</b><p>责令限期支付，逾期加付 <strong>50%–100%</strong> 赔偿金</p></div></div>
+      <div class="row"><span class="ric"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.3 2.4 2.4 4.6-5"/></svg></span><div class="rw"><b>维权建议</b><p>申请劳动仲裁 / 拨打 <a href="#">12333</a></p></div></div>
+      <div class="row risk"><span class="ric"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4.5 21 19.5H3z"/><path d="M12 10v4.5M12 17.2v.1"/></svg></span><div class="rw"><b>风险提示</b><p>仲裁时效一年</p><span>自知道或应当知道权利被侵害之日起计算</span></div></div>
+    </div>
+    <div class="ai-foot"><button class="btn grow">生成维权方案</button><button class="btn2">复制引用</button></div>
+  </aside>
+</main>
+<footer class="foot"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5m0-8.2v.1"/></svg>演示数据，仅供参考，不构成法律意见</footer>
+</body>
+</html>

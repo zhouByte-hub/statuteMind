@@ -1,0 +1,123 @@
+{
+  "title": "为 statuteMind 选定视觉世界",
+  "question": "骰子把构建指派给了「裁判文书排版」。保留它、选一张备选卡，或重掷。",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "裁判文书排版",
+      "kicker": "THE ROLL",
+      "lineage": "中文裁判文书与法律公文的排印传统",
+      "thesis": "把每次判断排成一份可交互的法律文书：文书即产品。",
+      "palette": ["#faf8f3", "#1c1b18", "#b7352c", "#8d8677"],
+      "materials": ["仿宋文书正文", "朱红印章", "一像素界栏"],
+      "viewport": "文书头导航带检索与判断双模式；判定结果以「首部—事实—理由—结论」的文书结构逐步排印，收尾落一枚朱红章。",
+      "risk": "排得拘谨就退成呆板的公文模板，需要纪念性编号和阶段动画撑住场面。",
+      "raised": [
+        { "from": "challenger-course", "raise": "推理链改为朱红编号控制点连成的路线，逐步划出：①定性 ②法条 ③处罚 ④风险。" },
+        { "from": "challenger-rail", "raise": "结论里每个论断经中央字键锚定回原文引文，单轴阻尼动效。" },
+        { "from": "challenger-signage", "raise": "每个判断步骤是一条只说一件事的步骤带，走完即重绘下一条。" },
+        { "from": "challenger-specimen", "raise": "案号与条款号以纪念性字号充当方位标。" },
+        { "from": "challenger-plates", "raise": "全部界栏与分隔线按设备像素精描。" },
+        { "from": "challenger-feed", "raise": "判断回放时整个视口让位给当前一步，全舞台呈现。" }
+      ],
+      "html": ".impeccable/mocks/decision/assigned.html"
+    },
+    {
+      "id": "model-pick",
+      "label": "卷宗宗卷",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "档案卷宗与归档传统",
+      "thesis": "把用户的描述立成一案：行为入卷、法条归档、结论盖章。",
+      "palette": ["#e9dcc3", "#2b2620", "#b7352c", "#33506b"],
+      "materials": ["牛皮纸", "归档章", "蓝黑钢笔"],
+      "viewport": "档案柜式导航加立案检索台；检索结果是抽出的卷内文件，判断以一枚归档章落下收尾。",
+      "risk": "暖调档案怀旧是这类题材最容易落地的方向，机制契合与动画语汇也确实最富。",
+      "html": ".impeccable/mocks/decision/model-pick.html"
+    },
+    {
+      "id": "challenger-course",
+      "label": "定向推理图",
+      "verdict": "competitive",
+      "lineage": "定向越野地图与检查点体系",
+      "thesis": "法律地形固定不动，判断路线像紫色赛程一样按编号检查点逐步走。",
+      "palette": ["#f5f4ee", "#26251f", "#6d4fa1", "#d9cf9a"],
+      "materials": ["等高线纹理", "编号控制点"],
+      "viewport": "左图例右地图的作业台：法条库是底层地形，推理路线以编号圆点叠加其上逐段描绘。",
+      "case": "融合顺畅：判断步骤天然映射为检查点序列，动画表现力强；但受众对越野世界缺少认同。",
+      "risk": "地形隐喻用力过猛时，工具感会被地图感吞掉。",
+      "hero": "https://impeccable.style/worlds/cards/notation-diagram-systems-orienteering-map-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/notation-diagram-systems-orienteering-map.webp",
+      "html": ".impeccable/mocks/decision/challenger-course.html"
+    },
+    {
+      "id": "challenger-rail",
+      "label": "中央字键排印",
+      "verdict": "competitive",
+      "lineage": "校勘本与中央轨排印规矩",
+      "thesis": "两栏内容绕一条朱红字键轨排布，每个论断都能沿键轨回到原文。",
+      "palette": ["#f2eee6", "#1a1917", "#c03a2b"],
+      "materials": ["一像素规矩线", "朱红字键"],
+      "viewport": "左栏检索证据、右栏判断结论，中央字键轨挂着一串可点的引文键，四边留注。",
+      "case": "引文装置正是本产品的卖点，学术认同度高；但对普通用户的排印门槛偏高。",
+      "risk": "密度掌控不当就成了一块博物馆展板。",
+      "hero": "https://impeccable.style/worlds/cards/rw-centre-rail-reference-setting-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/rw-centre-rail-reference-setting.webp",
+      "html": ".impeccable/mocks/decision/challenger-rail.html"
+    },
+    {
+      "id": "challenger-signage",
+      "label": "黄色导视带",
+      "verdict": "competitive",
+      "lineage": "机场标识导视系统",
+      "thesis": "把法律判断当作走廊里的一条条导视带：每个决策点只说一件事。",
+      "palette": ["#f2c200", "#141414", "#ffffff"],
+      "materials": ["黄色悬挂带", "黑底白色图标"],
+      "viewport": "黄底黑字主带给出当前判断结论，下方步骤带与时效/风险信息带分层悬挂、逐段重绘。",
+      "case": "引导性极强、信息层级天生清晰；黄色与法律的庄重感存在张力。",
+      "risk": "满屏黄色容易读成快递或导航应用，而不是法律工具。",
+      "hero": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-terminal-yellow-wayfinding-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-terminal-yellow-wayfinding.webp",
+      "html": ".impeccable/mocks/decision/challenger-signage.html"
+    },
+    {
+      "id": "challenger-specimen",
+      "label": "可变字体字样册",
+      "verdict": "declined",
+      "lineage": "可变字体交互字样册",
+      "palette": ["#f7f6f2", "#111111", "#d4451f"],
+      "case": "融合失手：巨型变形汉字是装饰不是机制，法律用户无从认同。",
+      "kept": "尺度对比的勇气——纪念性字号做方位标。"
+    },
+    {
+      "id": "challenger-plates",
+      "label": "年鉴图版页",
+      "verdict": "declined",
+      "lineage": "设计年鉴的图版插页",
+      "palette": ["#f5f4f6", "#16181a", "#dcddf3"],
+      "case": "融合失手：套准十字与发丝线是精密家具，撑不起判断机制本身。",
+      "kept": "一设备像素的规矩线工艺。"
+    },
+    {
+      "id": "challenger-feed",
+      "label": "竖屏信息流",
+      "verdict": "declined",
+      "lineage": "竖屏短视频流界面",
+      "palette": ["#000000", "#ffffff", "#fe2c55"],
+      "case": "融合失手：一次只看一条与检索工具需要的密度相抵。",
+      "kept": "全舞台承诺——一个状态占满整个视口。"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "buildPath": { "value": "code", "toggle": false },
+  "canon": true,
+  "canonCard": {
+    "label": "品类标准",
+    "thesis": "这个品类本来该有的样子，工艺做到极致。",
+    "palette": ["#ffffff", "#111827", "#2563eb"],
+    "materials": ["clean grid", "标准组件"],
+    "viewport": "蓝色顶栏加大搜索框加结果列表的法规数据库标准布局，对齐、间距、层级全部拉满。",
+    "risk": "设计上刻意与竞争者无法区分。",
+    "html": ".impeccable/mocks/decision/canon.html"
+  },
+  "steer": true
+}

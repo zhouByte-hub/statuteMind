@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>statuteMind · 行为判断 — 黄色导视带</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1440px;height:900px;overflow:hidden}
+body{background:#141414;color:#141414;font-family:'Noto Sans SC',sans-serif;display:flex;flex-direction:column}
+svg{display:block}
+.mono{font-family:'JetBrains Mono',monospace}
+/* ── 顶部黑色导航带 ── */
+.top{height:46px;flex:none;background:#141414;color:#fff;display:flex;align-items:center;padding:0 20px;gap:26px;border-bottom:1px solid #2c2c2c}
+.brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:900}
+.brand-mark{width:26px;height:26px;background:#f2c200;display:flex;align-items:center;justify-content:center}
+.brand-mark svg{width:18px;height:18px}
+.top nav{display:flex;gap:6px}
+.top nav a{color:rgba(255,255,255,.85);text-decoration:none;font-size:13px;font-weight:700;padding:15px 12px 12px;border-bottom:3px solid transparent}
+.top nav a.on{color:#fff;border-bottom-color:#f2c200}
+.badge{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:11px;color:#f2c200;letter-spacing:.05em}
+.badge i{width:7px;height:7px;background:#f2c200}
+/* ── 主体：左轨 + 带列 ── */
+.main{flex:1;display:flex;min-height:0}
+.rail{width:76px;flex:none;display:flex;flex-direction:column;align-items:center;gap:16px;padding:18px 0}
+.rail a{width:56px;display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;color:rgba(255,255,255,.72)}
+.rail .ic{width:52px;height:52px;background:#0d0d0d;border:1px solid rgba(255,255,255,.18);color:#fff;display:flex;align-items:center;justify-content:center}
+.rail .ic svg{width:24px;height:24px}
+.rail span{font-size:10px;font-weight:700;letter-spacing:.14em}
+.rail a.on{color:#f2c200}
+.rail a.on .ic{border-color:#f2c200;color:#f2c200}
+.deck{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px;padding:12px 16px 8px}
+.band{flex:none;position:relative;box-shadow:0 12px 26px rgba(0,0,0,.5)}
+.edge{position:absolute;right:0;top:0;bottom:0;width:54px;background:#141414;display:flex;align-items:center;justify-content:center}
+.edge svg{width:26px;height:26px}
+/* ── 检索带 ── */
+.search{height:58px;background:#0d0d0d;border:1px solid #2e2e2e;display:flex;align-items:center;gap:12px;padding:0 12px}
+.s-ic{width:34px;height:34px;flex:none;border:1px solid rgba(255,255,255,.22);color:#fff;display:flex;align-items:center;justify-content:center}
+.s-ic svg{width:17px;height:17px}
+.search input{flex:1;height:36px;border:none;outline:none;background:#fff;padding:0 14px;font-family:'Noto Sans SC',sans-serif;font-size:14px;font-weight:700;color:#141414}
+.search input::placeholder{color:rgba(20,20,20,.45)}
+.mode{display:flex;height:36px;flex:none}
+.mode button{height:36px;padding:0 16px;border:1px solid rgba(255,255,255,.35);background:transparent;color:rgba(255,255,255,.85);font-family:'Noto Sans SC',sans-serif;font-size:13px;font-weight:900}
+.mode .on{background:#f2c200;border-color:#f2c200;color:#141414}
+/* ── 主黄带：当前判断结论 ── */
+.verdict{height:196px;background:#f2c200;display:flex;align-items:center;gap:26px;padding:0 86px 0 30px}
+.v-ic{width:66px;height:66px;flex:none;background:#141414;display:flex;align-items:center;justify-content:center}
+.v-ic svg{width:38px;height:38px}
+.v-txt h1{font-size:52px;font-weight:900;line-height:1.12;letter-spacing:.01em}
+.v-sub{margin-top:12px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.v-sub b{background:#141414;color:#fff;padding:3px 9px;font-weight:900}
+.v-sub span{color:rgba(20,20,20,.8)}
+/* ── 步骤带 ── */
+.steps{height:60px;background:#f2c200;display:flex;align-items:stretch;padding-right:54px}
+.st{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:900}
+.st i{font-style:normal;font-size:16px}
+.st.done i{background:#141414;color:#f2c200;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.st.now{background:#141414;color:#fff}
+.st.now i{color:#f2c200}
+.st.next{color:rgba(20,20,20,.42)}
+.sa{width:36px;flex:none;display:flex;align-items:center;justify-content:center}
+.sa svg{width:22px;height:22px}
+/* ── 法条依据带（白底黄边） ── */
+.law{flex:1;min-height:0;background:#fff;border:3px solid #f2c200;display:flex;flex-direction:column;gap:4px;padding:16px 24px 12px}
+.law header{display:flex;align-items:center;gap:12px}
+.law .tag{background:#141414;color:#fff;font-size:12px;font-weight:900;padding:5px 10px}
+.law .sub{font-size:11px;color:rgba(20,20,20,.5);letter-spacing:.08em}
+.law article{display:flex;gap:16px;align-items:flex-start;padding:12px 2px}
+.law article + article{border-top:1px solid #e9e9e9}
+.l-ic{width:44px;height:44px;flex:none;background:#141414;display:flex;align-items:center;justify-content:center}
+.l-ic svg{width:22px;height:22px}
+.law h3{font-size:16px;font-weight:900;margin-bottom:4px}
+.law p{font-size:14px;line-height:1.75;color:rgba(20,20,20,.78)}
+/* ── 深色翻牌信息带 ── */
+.board{background:#101010;border:1px solid #2e2e2e;padding:10px 20px 6px;font-family:'JetBrains Mono',monospace}
+.b-head{display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.18em;color:rgba(255,255,255,.55);padding-bottom:6px}
+.b-head .y{color:#f2c200;font-weight:700}
+.b-head em{margin-left:auto;font-style:normal;color:rgba(255,255,255,.35)}
+.row{display:flex;align-items:center;gap:16px;padding:8px 0;border-top:1px dashed rgba(255,255,255,.18);font-size:14px}
+.lab{width:44px;flex:none;color:#f2c200;font-weight:700;letter-spacing:.12em}
+.val{color:#fff;font-weight:500;letter-spacing:.02em}
+/* ── 免责 ── */
+.dis{flex:none;text-align:center;font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.06em}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2"><path d="M12 4v15M7 20h10M5 7h14M7 7l-3 6h6zM17 7l-3 6h6z"/></svg></span>statuteMind · 法规智能引擎</div>
+  <nav><a href="#">法条检索</a><a class="on" href="#">行为判断</a><a href="#">知识库</a></nav>
+  <div class="badge mono"><i></i>演示数据 · 内置 1,286 条法条</div>
+</header>
+<div class="main">
+  <aside class="rail">
+    <a class="on" href="#"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v15M7 20h10M5 7h14M7 7l-3 6h6zM17 7l-3 6h6z"/></svg></span><span>判断</span></a>
+    <a href="#"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6zM15 2v5h5M9 12h6M9 16h6"/></svg></span><span>检索</span></a>
+    <a href="#"><span class="ic"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2L1 21h22z"/><rect x="11" y="9" width="2" height="6" fill="#0d0d0d"/><rect x="11" y="16.5" width="2" height="2" fill="#0d0d0d"/></svg></span><span>风险</span></a>
+    <a href="#"><span class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3h4l2 5-2.5 1.5a12 12 0 006 6L16 13l5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"/></svg></span><span>热线</span></a>
+  </aside>
+  <section class="deck">
+    <div class="band search">
+      <span class="s-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5L21 21"/></svg></span>
+      <input type="text" placeholder="公司拖欠工资 3 个月怎么办">
+      <div class="mode"><button type="button">搜法条</button><button type="button" class="on">判行为</button></div>
+    </div>
+    <section class="band verdict">
+      <span class="v-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 4v15M7 20h10M5 7h14M7 7l-3 6h6zM17 7l-3 6h6z"/></svg></span>
+      <div class="v-txt">
+        <h1>结论：违反《劳动合同法》第三十条</h1>
+        <p class="v-sub"><b>行为定性</b><span>拖欠劳动报酬（无故拖欠）</span></p>
+      </div>
+      <span class="edge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 3v16M5 13l7 7 7-7"/></svg></span>
+    </section>
+    <div class="band steps">
+      <div class="st done"><i>✓</i>行为定性</div>
+      <span class="sa"><svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2.4"><path d="M3 12h16M13 5l7 7-7 7"/></svg></span>
+      <div class="st done"><i>✓</i>法条匹配</div>
+      <span class="sa"><svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2.4"><path d="M3 12h16M13 5l7 7-7 7"/></svg></span>
+      <div class="st now"><i>●</i>处罚与责任</div>
+      <span class="sa"><svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2.4"><path d="M3 12h16M13 5l7 7-7 7"/></svg></span>
+      <div class="st next">风险提示</div>
+      <span class="edge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 3v16M5 13l7 7 7-7"/></svg></span>
+    </div>
+    <section class="band law">
+      <header><span class="tag">法条依据</span><span class="sub mono">LEGAL BASIS · 2 条</span></header>
+      <article>
+        <span class="l-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 2h9l5 5v15H6zM15 2v5h5M9 12h6M9 16h6"/></svg></span>
+        <div><h3>《劳动合同法》第三十条</h3><p>「用人单位应当按照劳动合同约定和国家规定，向劳动者及时足额支付劳动报酬。」</p></div>
+      </article>
+      <article>
+        <span class="l-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 2h9l5 5v15H6zM15 2v5h5M9 12h6M9 16h6"/></svg></span>
+        <div><h3>《劳动合同法》第八十五条（节引）</h3><p>「由劳动行政部门责令限期支付……逾期不支付的，责令按应付金额百分之五十以上百分之一百以下的标准向劳动者加付赔偿金。」</p></div>
+      </article>
+    </section>
+    <section class="band board">
+      <div class="b-head"><span class="y">LIVE</span>处罚与责任 · 持续更新<em>DEMO DATA</em></div>
+      <div class="row"><span class="lab">时效</span><span class="val">仲裁时效 1 年</span></div>
+      <div class="row"><span class="lab">处罚</span><span class="val">责令支付+50%–100%赔偿金</span></div>
+      <div class="row"><span class="lab">热线</span><span class="val">12333 劳动保障监察</span></div>
+    </section>
+    <footer class="dis">免责：演示数据，仅供参考，不构成法律意见</footer>
+  </section>
+</div>
+</body>
+</html>

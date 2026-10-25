@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>statuteMind · 法规智能引擎（原型）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ========== 百度式搜索引擎界面：白底 / 居中品牌 + 大搜索框 / 结果列表 ========== */
+:root{
+  --blue:#3D5CE5; --blue-h:#2F49CE; --link:#2440B1;
+  --ink:#222; --ink2:#333; --muted:#5F6672; --faint:#6E7683;
+  --bg:#fff; --gray:#f5f5f6; --line:#E8EAED; --line2:#F1F3F5;
+  --red:#C63A30; --amber:#B25E00;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --shadow:0 2px 10px rgba(30,35,50,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{color-scheme:light}
+body{min-height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;font-size:14px}
+::selection{background:rgba(78,110,242,.18)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+[hidden]{display:none!important}
+b,strong{font-weight:700}
+.num-tab{font-variant-numeric:tabular-nums}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes tick{30%{transform:scale(1.12)}}
+@keyframes flashbg{0%{background:#F3F6FF}100%{background:transparent}}
+@keyframes loadgrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+/* ========== 顶栏 ========== */
+.top{flex:none;height:60px;display:flex;align-items:center;gap:28px;padding:0 28px;border-bottom:1px solid var(--line2)}
+.brand{display:none;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-weight:900;font-size:19px;white-space:nowrap}
+.brand em{color:var(--blue);font-style:normal}
+body.serpmode .brand{display:inline-flex}
+.top nav{display:flex;gap:26px}
+.top nav a{font-size:14px;color:var(--ink2);text-decoration:none;padding:19px 2px 17px;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;white-space:nowrap}
+.top nav a:hover{color:var(--blue)}
+.top nav a.on{color:var(--blue);font-weight:700;border-color:var(--blue)}
+.badge{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 12px;background:var(--gray);white-space:nowrap}
+.badge .dot{width:6px;height:6px;border-radius:50%;background:var(--blue)}
+.badge b{color:var(--blue)}
+.badge.tick{animation:tick .5s var(--ease)}
+
+/* ========== 主区 ========== */
+main{flex:1;display:flex;flex-direction:column}
+.view{display:none}
+.view.active{display:block;animation:fadein .25s both}
+
+/* ---- 首页主视觉（居中品牌 + 大搜索框） ---- */
+.heroWrap{max-width:880px;margin:0 auto;padding:clamp(48px,10vh,110px) 20px 26px;text-align:center}
+.heroWrap>*{animation:rise .55s var(--ease) both}
+.brandBig{animation-delay:.02s}
+.modeTabs{animation-delay:.08s}
+.sboxRow{animation-delay:.14s}
+.chips{animation-delay:.2s}
+.recent{animation-delay:.26s}
+.brandBig svg{width:72px;height:72px}
+.brandBig h1{font-size:50px;font-weight:900;letter-spacing:.01em;margin-top:14px;color:var(--ink)}
+.brandBig h1 em{font-style:normal;color:var(--blue)}
+.tagline{margin-top:12px;font-size:14.5px;color:var(--muted);letter-spacing:.05em}
+.modeTabs{display:inline-flex;gap:30px;margin:36px auto 16px}
+.modeTabs button{font-size:15px;color:var(--muted);padding:4px 2px;border-bottom:2px solid transparent;transition:color .2s}
+.modeTabs button:hover{color:var(--ink)}
+.modeTabs button.on{color:var(--blue);font-weight:700;border-color:var(--blue)}
+
+/* ---- 搜索框行：首页居中大框；搜索后吸顶窄框（百度 SERP 形态） ---- */
+.sboxRow{display:flex;justify-content:center;align-items:center;gap:16px}
+.serpLogo{display:none;align-items:center;gap:7px;text-decoration:none;color:var(--ink);font-weight:900;font-size:17px;white-space:nowrap}
+.serpLogo em{color:var(--blue);font-style:normal}
+.serpLogo svg{flex:none}
+.sbox{display:flex;width:min(620px,100%)}
+.sbox input{flex:1;min-width:0;height:48px;border:2px solid var(--blue);border-right:0;border-radius:10px 0 0 10px;padding:0 16px;font:400 15px 'Noto Sans SC',sans-serif;color:var(--ink);background:#fff;transition:box-shadow .2s}
+.sbox input::placeholder{color:var(--faint)}
+.sbox input:focus{outline:none;box-shadow:0 0 0 4px rgba(78,110,242,.14)}
+.sbox .go{flex:none;width:110px;height:48px;background:var(--blue);color:#fff;font:700 15px 'Noto Sans SC',sans-serif;border-radius:0 10px 10px 0;letter-spacing:.1em;transition:background .2s,transform .15s var(--ease)}
+.sbox .go:hover{background:var(--blue-h)}
+.sbox .go:active{transform:scale(.97)}
+
+/* 搜索后：收起主视觉，搜索框吸顶 */
+.view.compact .heroWrap{padding:0 0 6px}
+.view.compact .brandBig,.view.compact .modeTabs,.view.compact .chips,.view.compact .recent{display:none}
+.view.compact .sboxRow{position:sticky;top:0;z-index:20;background:#fff;padding:12px 20px;border-bottom:1px solid var(--line)}
+.view.compact .serpLogo{display:inline-flex}
+.view.compact .sbox input,.view.compact .sbox .go{height:42px}
+
+/* 检索中加载条 */
+.loadbar{max-width:620px;margin:16px auto 0;height:4px;border-radius:99px;background:var(--gray);overflow:hidden}
+.loadbar i{display:block;height:100%;width:100%;background:var(--blue);border-radius:99px;transform-origin:left;animation:loadgrow .7s var(--ease) forwards}
+
+/* 示例关键词 chips */
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:22px}
+.chipLabel{align-self:center;font-size:13px;color:var(--muted)}
+.chip{font-size:13px;font-weight:500;padding:6px 14px;border-radius:999px;background:var(--gray);color:var(--ink2);border:1px solid transparent;transition:background .2s,color .2s,transform .15s var(--ease)}
+.chip:hover{background:#E8ECFE;color:var(--blue)}
+.chip:active{transform:scale(.96)}
+.chip.on{background:var(--blue);color:#fff;font-weight:700}
+.chip .n{font-size:11.5px;opacity:.8;margin-left:4px}
+
+/* 最近检索 */
+.recent{max-width:620px;margin:36px auto 0;text-align:left;border-top:1px dashed var(--line);padding-top:18px}
+.recent h2{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.rrow{display:flex;align-items:center;gap:9px;width:100%;text-align:left;font-size:13.5px;padding:8px 10px;border-radius:8px;color:var(--ink2);transition:background .15s}
+.rrow:hover{background:var(--gray)}
+.rrow svg{flex:none;opacity:.75}
+.rrow b{font-weight:500}
+.rrow em{font-style:normal;margin-left:auto;font-size:11.5px;color:var(--faint)}
+.none{font-size:13px;color:var(--muted);padding:6px 0}
+
+/* ========== 结果区（SERP） ========== */
+.serp{display:none;max-width:720px;margin:0 auto;padding:18px 20px 80px}
+.view.compact .serp{display:block}
+.meta{font-size:13px;color:var(--muted);margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.linklike{background:none;border:0;padding:0;color:var(--link);font-size:13px;cursor:pointer;text-decoration:none}
+.linklike:hover{text-decoration:underline}
+
+/* 检索结果条目 */
+.r{margin-bottom:30px;animation:rise .5s var(--ease) both;animation-delay:calc(var(--i)*90ms)}
+.r h3{font-size:16.5px;font-weight:600;line-height:1.5}
+.rtitle{color:var(--link);text-align:left;font-size:inherit;font-weight:inherit;line-height:inherit}
+.rtitle:hover{text-decoration:underline}
+.rsubj{color:var(--muted);font-size:13.5px;font-weight:500}
+.rsrc{display:flex;align-items:center;gap:10px;margin-top:5px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.tag{flex:none;font-size:11px;font-weight:600;padding:1.5px 8px;border-radius:4px;background:#EEF1FE;color:#3B55C9}
+.tag.amber{background:#FDF0E6;color:var(--amber)}
+.rscore{margin-left:auto;font-variant-numeric:tabular-nums}
+.demoTag{font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:2px 7px}
+.rquote{margin-top:8px;font-size:14px;line-height:1.85;color:var(--ink2)}
+b.hl{color:var(--red);font-weight:700}
+.ract{display:flex;gap:8px;margin-top:9px}
+.mini{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:6px;padding:4.5px 12px;font:600 12.5px 'Noto Sans SC',sans-serif;color:var(--ink2);background:#fff;transition:border-color .2s,color .2s,background .2s,transform .15s var(--ease)}
+.mini:hover{border-color:var(--blue);color:var(--blue);background:#F5F7FF}
+.mini:active{transform:scale(.96)}
+.mini.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.mini.pri:hover{background:var(--blue-h);color:#fff}
+
+/* 空态 / 未收录提示 */
+.notice{background:var(--gray);border-radius:12px;padding:36px 24px;text-align:center;animation:rise .45s var(--ease) both}
+.notice svg{display:block;margin:0 auto 12px}
+.notice b{display:block;font-size:15.5px;margin-bottom:8px}
+.notice p{font-size:13.5px;color:var(--muted);line-height:1.8;margin-bottom:14px}
+
+/* ========== 行为判断：左输入面板 + 右分析图谱 ========== */
+#view-judge{flex:1}
+#view-judge.active{display:flex}
+.judgeWrap{flex:1;display:flex;min-width:0}
+.jleft{flex:none;width:400px;border-right:1px solid var(--line);padding:30px 26px;display:flex;flex-direction:column}
+.jleftTitle{font-size:22px;font-weight:900}
+.jleftSub{margin-top:8px;font-size:13px;line-height:1.8;color:var(--muted)}
+.fieldLabel{margin-top:26px;font-size:12.5px;font-weight:600;color:var(--muted)}
+#judgeInput{margin-top:8px;width:100%;resize:vertical;min-height:96px;border:1.5px solid #C9CED8;border-radius:10px;padding:12px 14px;font:400 14px/1.7 'Noto Sans SC',sans-serif;color:var(--ink);background:#fff;transition:border-color .2s,box-shadow .2s}
+#judgeInput:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(61,92,229,.14)}
+#judgeInput::placeholder{color:var(--faint)}
+.jleftAct{margin-top:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.goBtn{flex:none;height:42px;padding:0 26px;background:var(--blue);color:#fff;border-radius:9px;font:700 14.5px 'Noto Sans SC',sans-serif;letter-spacing:.06em;transition:background .2s,transform .15s var(--ease)}
+.goBtn:hover{background:var(--blue-h)}
+.goBtn:active{transform:scale(.97)}
+.kbdHint{font-size:12px;color:var(--faint)}
+.jchips{justify-content:flex-start;margin-top:24px}
+.jnote{margin-top:auto;padding-top:22px;font-size:12px;color:var(--muted);line-height:1.8}
+
+.jright{flex:1;min-width:0;display:flex;flex-direction:column}
+.ghead{display:flex;align-items:center;gap:12px;padding:18px 28px 0;flex-wrap:wrap;animation:rise .4s var(--ease)}
+.ghead b{font-size:15.5px;font-weight:800}
+.gwrap{flex:1;overflow-x:auto;padding:10px 28px 6px}
+.gcanvas{position:relative;min-width:940px;padding:14px 0}
+.gedges{position:absolute;inset:0;width:100%;height:100%}
+.gedges path{fill:none;stroke:var(--blue);stroke-opacity:.45;stroke-width:2;stroke-dasharray:1;stroke-dashoffset:1;animation:edgedraw .55s var(--ease) forwards;animation-delay:var(--d,0s)}
+@keyframes edgedraw{to{stroke-dashoffset:0}}
+.gcols{position:relative;display:flex;align-items:center;gap:44px;min-height:420px}
+.gcol{display:flex;flex-direction:column;gap:40px;justify-content:center}
+.gnode{flex:none;width:200px;text-align:left;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:13px 15px;animation:rise .5s var(--ease) both;animation-delay:calc(var(--i)*120ms);transition:border-color .2s,box-shadow .2s,transform .15s var(--ease)}
+.gnode:hover{border-color:#B9C4F2;transform:translateY(-1px)}
+.gnode.sel{border-color:var(--blue);box-shadow:0 0 0 3px rgba(61,92,229,.13)}
+.gtag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:1.5px 8px;border-radius:4px;background:#EEF1FE;color:#3B55C9}
+.gtag.t-act{background:rgba(255,255,255,.22);color:#fff}
+.gtag.t-law{background:#EEF1FE;color:#2440B1}
+.gtag.t-pun{background:#FDF0E6;color:var(--amber)}
+.gtag.t-risk{background:#FCEDEA;color:#A8332A}
+.gtitle{display:block;margin-top:8px;font-size:14px;font-weight:800;line-height:1.5;color:var(--ink)}
+.gsub{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:5px;font-size:12px;line-height:1.7;color:var(--muted)}
+.gnode.root{background:var(--blue);border-color:var(--blue)}
+.gnode.root .gtitle{color:#fff}
+.gnode.root .gsub{color:rgba(255,255,255,.85)}
+.gempty{margin:auto;max-width:440px;text-align:center;padding:40px 20px;animation:rise .45s var(--ease)}
+.gempty svg{margin-bottom:12px}
+.gempty b{display:block;font-size:16px;margin-bottom:8px}
+.gempty p{font-size:13px;color:var(--muted);line-height:1.9}
+.jright .notice{margin:24px 28px}
+.gdetail{flex:none;margin:6px 28px 24px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:16px 20px;animation:rise .4s var(--ease)}
+.gdhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.gdhead b{font-size:14.5px;font-weight:800}
+.gdact{margin-left:auto;display:flex;gap:8px}
+.jrows{margin-top:6px;border-top:1px dashed var(--line)}
+.jrow{display:flex;gap:14px;padding:8px 0;border-bottom:1px dashed var(--line2);font-size:13.5px}
+.jrow:last-child{border-bottom:0}
+.jrow dt{flex:none;width:88px;color:var(--muted)}
+.jrow dd{flex:1;font-weight:600;color:var(--ink)}
+.jrow dd small{display:block;font-weight:500;font-size:12.5px;color:var(--muted);margin-top:2px}
+
+/* ========== 知识库 ========== */
+.libWrap{max-width:760px;margin:0 auto;padding:34px 20px 80px}
+.libHeadRow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;animation:rise .5s var(--ease) both}
+.libHeadRow h1{font-size:24px;font-weight:900}
+.drop{margin-left:auto;display:inline-flex;align-items:center;gap:10px;border:1.5px dashed #C9CED8;border-radius:10px;background:#fff;padding:9px 16px;font:600 13px 'Noto Sans SC',sans-serif;color:var(--ink2);text-align:left;transition:border-color .2s,background .2s}
+.drop:hover,.drop.over{border-color:var(--blue);background:#F5F7FF}
+.drop span{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:1px}
+.libMeta{margin-top:12px;font-size:13px;color:var(--muted);line-height:1.8;animation:rise .5s .06s var(--ease) both}
+.uplog{margin-top:14px;font-size:12.5px;color:var(--muted);animation:rise .4s var(--ease)}
+.upbar{height:6px;background:var(--gray);border-radius:99px;overflow:hidden;margin-top:7px}
+.upbar b{display:block;height:100%;width:0;background:var(--blue);transition:width .18s linear}
+.catChips{justify-content:flex-start;margin:20px 0 6px;border-bottom:1px solid var(--line);padding-bottom:14px}
+.lgroup h2{font-size:14px;font-weight:800;margin:24px 0 2px;display:flex;align-items:center;gap:8px}
+.lgroup h2::before{content:"";width:4px;height:14px;border-radius:2px;background:var(--blue)}
+.lgroup h2 span{font-size:12px;color:var(--muted);font-weight:500}
+.lrow{padding:16px 2px;border-bottom:1px solid var(--line2);animation:rise .45s var(--ease) both;animation-delay:calc(var(--i)*35ms)}
+.lrow .lt{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lrow .lt b{font-size:15.5px;font-weight:700}
+.lrow .subj{font-size:12.5px;color:var(--muted)}
+.lrow .q{margin-top:8px;font-size:13.5px;line-height:1.9;color:var(--ink2)}
+.lrow .ract{margin-top:9px}
+.lrow.flash{animation:flashbg 1.2s var(--ease)}
+
+/* ========== 页脚 ========== */
+footer{flex:none;padding:26px 20px 36px;text-align:center;font-size:12.5px;color:var(--muted);line-height:1.9}
+footer b{color:var(--ink);font-weight:600}
+
+/* ========== 响应式 ========== */
+@media (max-width:960px){
+  .judgeWrap{flex-direction:column}
+  .jleft{width:auto;border-right:0;border-bottom:1px solid var(--line);padding:22px 16px}
+  .fieldLabel{margin-top:20px}
+  .jnote{margin-top:18px;padding-top:0}
+  .jright{padding-bottom:26px}
+  .ghead{padding:16px 16px 0}
+  .gwrap{overflow-x:visible;padding:14px 16px 0}
+  .gcanvas{min-width:0}
+  .gedges{display:none}
+  .gcols{flex-direction:column;align-items:stretch;gap:14px;min-height:0}
+  .gcol{flex-direction:column;gap:14px}
+  .gnode{width:auto}
+  .gdetail{margin:16px 16px 0}
+  .jright .notice{margin:16px}
+}
+@media (max-width:760px){
+  .top{padding:0 14px;gap:14px}
+  .top nav{gap:14px}
+  .top nav a{padding:19px 0 17px;font-size:13px}
+  .badge{display:none}
+  .heroWrap{padding-top:7vh}
+  .brandBig svg{width:54px;height:54px}
+  .brandBig h1{font-size:38px}
+  .tagline{font-size:13px}
+  .sbox input{height:44px;font-size:14px;padding:0 12px}
+  .sbox .go{width:88px;height:44px;font-size:14px}
+  .view.compact .sbox input,.view.compact .sbox .go{height:40px}
+  .serpLogo span{display:none}
+  .serp{padding:14px 16px 60px}
+  .jrow dt{width:76px}
+  .libHeadRow .drop{margin-left:0}
+}
+/* 动效降级 */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;animation-delay:0s!important;transition-duration:.001s!important}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="#/search" id="brandHome" aria-label="statuteMind 首页">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v15M9 20h6" stroke="#4E6EF2" stroke-width="2" stroke-linecap="round"/><path d="M5 6h14" stroke="#4E6EF2" stroke-width="2" stroke-linecap="round"/><path d="M7 6l-2.8 6a3.2 3.2 0 0 0 5.6 0L7 6z" stroke="#4E6EF2" stroke-width="1.7" stroke-linejoin="round"/><path d="M17 6l-2.8 6a3.2 3.2 0 0 0 5.6 0L17 6z" stroke="#4E6EF2" stroke-width="1.7" stroke-linejoin="round"/></svg>
+    statute<em>Mind</em>
+  </a>
+  <nav aria-label="模式导航">
+    <a href="#/search" data-view="search">法条检索</a>
+    <a href="#/judge" data-view="judge">行为判断</a>
+    <a href="#/library" data-view="library">知识库</a>
+  </nav>
+  <span class="badge" id="badge"><span class="dot" aria-hidden="true"></span>演示数据 · 内置 <b id="badgeCount">1,286</b> 条法条</span>
+</header>
+
+<main>
+
+<!-- ============ 视图一：法条检索（首页） ============ -->
+<section class="view active" data-view="search" id="view-search" aria-label="法条检索">
+  <div class="heroWrap">
+    <div class="brandBig">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v15M9 20h6" stroke="#4E6EF2" stroke-width="1.8" stroke-linecap="round"/><path d="M5 6h14" stroke="#4E6EF2" stroke-width="1.8" stroke-linecap="round"/><path d="M7 6l-2.8 6a3.2 3.2 0 0 0 5.6 0L7 6z" stroke="#4E6EF2" stroke-width="1.5" stroke-linejoin="round"/><path d="M17 6l-2.8 6a3.2 3.2 0 0 0 5.6 0L17 6z" stroke="#4E6EF2" stroke-width="1.5" stroke-linejoin="round"/><circle cx="12" cy="3.4" r="1.3" fill="#4E6EF2"/></svg>
+      <h1>statute<em>Mind</em></h1>
+      <p class="tagline">把生活语言翻译成法律语言 · 条文出处可查</p>
+    </div>
+    <div class="modeTabs" aria-label="检索模式">
+      <button class="on" aria-current="true">搜法条</button>
+      <button data-goto="judge">判行为</button>
+    </div>
+    <div class="sboxRow">
+      <a class="serpLogo" href="#/search" aria-label="返回 statuteMind 首页">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v15M9 20h6" stroke="#4E6EF2" stroke-width="2" stroke-linecap="round"/><path d="M5 6h14" stroke="#4E6EF2" stroke-width="2" stroke-linecap="round"/><path d="M7 6l-2.8 6a3.2 3.2 0 0 0 5.6 0L7 6z" stroke="#4E6EF2" stroke-width="1.7" stroke-linejoin="round"/><path d="M17 6l-2.8 6a3.2 3.2 0 0 0 5.6 0L17 6z" stroke="#4E6EF2" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        <span>statute<em>Mind</em></span>
+      </a>
+      <div class="sbox">
+        <input id="searchInput" type="text" placeholder="输入关键词，如：拖欠工资" aria-label="法条关键词">
+        <button class="go" id="searchGo">搜法条</button>
+      </div>
+    </div>
+    <div class="chips" aria-label="示例关键词">
+      <span class="chipLabel">示例：</span>
+      <button class="chip" data-q="拖欠工资">拖欠工资</button>
+      <button class="chip" data-q="高空抛物">高空抛物</button>
+      <button class="chip" data-q="网上辱骂">网上辱骂</button>
+      <button class="chip" data-q="租房押金">租房押金</button>
+      <button class="chip" data-q="噪音扰民">噪音扰民</button>
+      <button class="chip" data-q="狗咬人">狗咬人</button>
+    </div>
+    <div class="recent">
+      <h2>最近检索</h2>
+      <div id="recentBox"><p class="none">暂无检索记录，试试上方示例关键词</p></div>
+    </div>
+  </div>
+  <div class="loadbar" id="loadbar" hidden aria-hidden="true"><i></i></div>
+  <div class="serp">
+    <p class="meta" id="searchMeta" role="status"></p>
+    <div id="searchList"></div>
+  </div>
+</section>
+
+<!-- ============ 视图二：行为判断（左输入 · 右分析图谱） ============ -->
+<section class="view" data-view="judge" id="view-judge" aria-label="行为判断">
+  <div class="judgeWrap">
+    <aside class="jleft" aria-label="行为输入面板">
+      <h1 class="jleftTitle">行为判断</h1>
+      <p class="jleftSub">描述一个行为，即刻生成「行为 → 定性 → 法条 → 处罚 → 风险」分析图谱</p>
+      <label class="fieldLabel" for="judgeInput">行为描述</label>
+      <textarea id="judgeInput" rows="4" placeholder="例如：公司拖欠工资 3 个月&#10;也可以描述：网上辱骂他人、高空抛物……" aria-label="描述一个行为"></textarea>
+      <div class="jleftAct">
+        <button class="goBtn" id="judgeGo">开始判断</button>
+        <span class="kbdHint">Ctrl / ⌘ + Enter 也可提交</span>
+      </div>
+      <div class="chips jchips" aria-label="示例行为">
+        <span class="chipLabel">示例：</span>
+        <button class="chip" data-j="j1">拖欠工资</button>
+        <button class="chip" data-j="j2">网上辱骂</button>
+        <button class="chip" data-j="j3">高空抛物</button>
+      </div>
+      <p class="jnote">演示数据 · AI 判断仅供参考，不构成法律意见</p>
+    </aside>
+    <section class="jright" aria-label="分析图谱">
+      <div class="ghead" id="ghead" hidden>
+        <b id="gname"></b>
+        <span class="demoTag">分析图谱 · 演示数据</span>
+        <button class="linklike" data-reset="judge">重新输入</button>
+      </div>
+      <div class="gwrap">
+        <div class="gcanvas" id="gcanvas">
+          <svg class="gedges" id="graphSvg" aria-hidden="true"></svg>
+          <div class="gcols" id="gcols"></div>
+        </div>
+      </div>
+      <div class="gempty" id="gempty">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="6" r="2.4" stroke="#3D5CE5" stroke-width="1.8"/><circle cx="5" cy="18" r="2.4" stroke="#3D5CE5" stroke-width="1.8"/><circle cx="17" cy="18" r="2.4" stroke="#3D5CE5" stroke-width="1.8"/><path d="M9.8 8 6.2 15.8M12.2 8l3.6 7.8M7.4 18h7.2" stroke="#3D5CE5" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <b>输入行为，生成分析图谱</b>
+        <p>左侧描述一个行为（或点击示例），右侧将生成行为定性、匹配法条、处罚与风险的推理图谱；点击图谱节点可查看结构化详情。</p>
+      </div>
+      <div class="notice" id="gnotice" hidden></div>
+      <div class="gdetail" id="gdetail" hidden aria-live="polite"></div>
+    </section>
+  </div>
+</section>
+
+<!-- ============ 视图三：知识库 ============ -->
+<section class="view" data-view="library" id="view-library" aria-label="知识库">
+  <div class="libWrap">
+    <div class="libHeadRow">
+      <h1>知识库 <span class="demoTag">演示数据</span></h1>
+      <button class="drop" id="drop" aria-label="上传文档扩充知识库（模拟流程）">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16V5m0 0 4 4m-4-4-4 4" stroke="#4E6EF2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke="#4E6EF2" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>上传文档，扩充知识库<span>点击选择或拖入文件 · 模拟流程</span></span>
+      </button>
+    </div>
+    <p class="libMeta">精选内置 <b class="num-tab">16</b> 条真实条文节引 + 导入 <b class="num-tab">2</b> 条演示条目，可被「法条检索」与「行为判断」引用；上传后新条目将入库（此原型不真正解析文件）。</p>
+    <div class="uplog" id="uplog" role="status" hidden>
+      <span id="upName">演示文件_劳动争议案例汇编.pdf</span>
+      <div class="upbar"><b id="upFill"></b></div>
+      <span id="upTxt" class="num-tab">0%</span>
+    </div>
+    <div class="chips catChips" id="catChips" aria-label="按法规分类筛选"></div>
+    <div id="libList"></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p><b>演示数据，仅供参考，不构成法律意见</b> · statuteMind 原型 · 当前：<span id="footView">法条检索</span>模式</p>
+</footer>
+
+<script>
+/* ================= 数据（演示） ================= */
+const JUDGMENTS={
+  j1:{name:'公司拖欠工资 3 个月',q:'拖欠工资',lib:'l30',lib2:'l50',cps:[
+    {t:'行为定性',d:'拖欠劳动报酬 — 用人单位未按约定及时足额支付工资，事实清楚，构成违法',card:[['行为名称','拖欠劳动报酬'],['定性结论','违法 · 事实清楚'],['关键事实','拖欠已达 3 个月']]},
+    {t:'法条匹配',d:'《劳动合同法》第三十条「用人单位应当按照劳动合同约定和国家规定，向劳动者及时足额支付劳动报酬。」',card:[['法律依据','《劳动合同法》第三十条'],['条文摘引','向劳动者及时足额支付劳动报酬'],['配套条文','《劳动法》第五十条']]},
+    {t:'处罚与责任',d:'责令限期支付；逾期按应付金额 50%–100% 加付赔偿金；可申请劳动仲裁',card:[['处罚措施','责令限期支付'],['逾期赔偿','按应付金额 50%–100%','加付赔偿金'],['法律依据','《劳动合同法》第八十五条'],['救济途径','劳动者可申请劳动仲裁']]},
+    {t:'风险提示',d:'仲裁时效一年；保留工资条、考勤记录等证据；求助热线 12333',card:[['仲裁时效','一年 · 自知道权益受损起'],['证据保留','工资条 · 考勤记录 · 沟通记录'],['求助渠道','劳动监察热线 12333']]}
+  ]},
+  j2:{name:'在网上辱骂他人',q:'辱骂',lib:'a42',lib2:'m1024',cps:[
+    {t:'行为定性',d:'公然侮辱、捏造事实诽谤他人 — 侵犯名誉权，可予治安处罚，情节严重可涉刑',card:[['行为名称','网络侮辱 / 诽谤'],['定性结论','治安违法 · 情节严重可构成犯罪'],['侵害法益','他人名誉权']]},
+    {t:'法条匹配',d:'《治安管理处罚法》第四十二条「公然侮辱他人或者捏造事实诽谤他人的，处五日以下拘留或者五百元以下罚款；情节较重的，处五日以上十日以下拘留，可以并处五百元以下罚款。」',card:[['法律依据','《治安管理处罚法》第四十二条'],['条文摘引','公然侮辱他人或者捏造事实诽谤他人的'],['民事层面','《民法典》第一千零二十四条 · 名誉权']]},
+    {t:'处罚与责任',d:'五日以下拘留或五百元以下罚款；情节较重处五至十日拘留；可主张赔礼道歉与赔偿',card:[['治安处罚','五日以下拘留或五百元以下罚款'],['情节较重','五日以上十日以下拘留'],['民事责任','停止侵害 · 赔礼道歉 · 赔偿损失']]},
+    {t:'风险提示',d:'点击 5,000 次或被转发 500 次以上可构成诽谤罪；立即删除并保存证据',card:[['入刑门槛','点击/浏览 5,000 次或转发 500 次以上'],['可能罪名','《刑法》第二百四十六条 · 侮辱、诽谤罪'],['当前建议','立即删除内容，保存截图证据']]}
+  ]},
+  j3:{name:'高空抛物',q:'高空抛物',lib:'m1254',lib2:'c2912',cps:[
+    {t:'行为定性',d:'从建筑物中抛掷物品 — 《民法典》明文禁止，危及他人人身与财产安全',card:[['行为名称','高空抛物'],['定性结论','法律明文禁止的危险行为'],['侵害法益','公共安全 · 他人人身财产权益']]},
+    {t:'法条匹配',d:'《民法典》第一千二百五十四条「禁止从建筑物中抛掷物品。从建筑物中抛掷物品或者从建筑物上坠落的物品造成他人损害的，由侵权人依法承担侵权责任。」',card:[['法律依据','《民法典》第一千二百五十四条'],['条文摘引','禁止从建筑物中抛掷物品'],['刑事衔接','《刑法》第二百九十一条之二']]},
+    {t:'处罚与责任',d:'侵权人承担赔偿责任；难以确定侵权人时由可能加害者补偿；物业未尽安保义务同责',card:[['民事责任','侵权人依法赔偿'],['公平补偿','难以确定侵权人时，可能加害的使用人补偿'],['物业责任','未尽安全保障义务依法承担'],['刑事风险','情节严重处一年以下有期徒刑、拘役或管制']]},
+    {t:'风险提示',d:'抛掷本身即违法，无须等到造成损害；发现即劝阻、举报',card:[['紧迫性','未造成损害，抛掷行为也已被禁止'],['证据建议','监控 · 照片 · 证人'],['求助渠道','物业 · 110 · 12345']]}
+  ]}
+};
+const PRESET_KEYS=[['拖欠|工资|欠薪|劳动报酬','j1'],['骂|辱|诽谤|网暴|名誉','j2'],['高空|抛物|坠物','j3']];
+const STATUTES=[
+ {id:'l30',law:'《劳动合同法》',art:'第三十条',subj:'劳动报酬',cat:'劳动法系',jid:'j1',kws:['工资','拖欠','欠薪','劳动报酬'],text:'用人单位应当按照劳动合同约定和国家规定，向劳动者及时足额支付劳动报酬。用人单位拖欠或者未足额支付劳动报酬的，劳动者可以依法向当地人民法院申请支付令，人民法院应当依法发出支付令。'},
+ {id:'l85',law:'《劳动合同法》',art:'第八十五条',subj:'加付赔偿金',cat:'劳动法系',jid:'j1',kws:['拖欠','赔偿金','欠薪','劳动监察'],text:'用人单位未按照劳动合同的约定或者国家规定及时足额支付劳动者劳动报酬的，由劳动行政部门责令限期支付；逾期不支付的，责令用人单位按应付金额百分之五十以上百分之一百以下的标准向劳动者加付赔偿金。（节引）'},
+ {id:'l50',law:'《劳动法》',art:'第五十条',subj:'工资支付',cat:'劳动法系',kws:['工资','克扣','拖欠'],text:'工资应当以货币形式按月支付给劳动者本人。不得克扣或者无故拖欠劳动者的工资。'},
+ {id:'a42',law:'《治安管理处罚法》',art:'第四十二条',subj:'侮辱·诽谤',cat:'治安管理',jid:'j2',kws:['骂','辱骂','侮辱','诽谤','网暴','辱'],text:'有下列行为之一的，处五日以下拘留或者五百元以下罚款；情节较重的，处五日以上十日以下拘留，可以并处五百元以下罚款：……（二）公然侮辱他人或者捏造事实诽谤他人的……（节引）'},
+ {id:'m1024',law:'《民法典》',art:'第一千零二十四条',subj:'名誉权',cat:'民法典',jid:'j2',kws:['名誉','侮辱','诽谤','网暴','骂'],text:'民事主体享有名誉权。任何组织或者个人不得以侮辱、诽谤等方式侵害他人的名誉权。名誉是对民事主体的品德、声望、才能、信用等的社会评价。'},
+ {id:'m1254',law:'《民法典》',art:'第一千二百五十四条',subj:'高空抛物',cat:'民法典',jid:'j3',kws:['高空抛物','抛掷','坠物'],text:'禁止从建筑物中抛掷物品。从建筑物中抛掷物品或者从建筑物上坠落的物品造成他人损害的，由侵权人依法承担侵权责任；经调查难以确定具体侵权人的，除能够证明自己不是侵权人的外，由可能加害的建筑物使用人给予补偿。（节引）'},
+ {id:'c2912',law:'《刑法》',art:'第二百九十一条之二',subj:'高空抛物罪',cat:'刑法',jid:'j3',kws:['高空抛物','抛掷'],text:'从建筑物或者其他高处抛掷物品，情节严重的，处一年以下有期徒刑、拘役或者管制，并处或者单处罚金。'},
+ {id:'a58',law:'《治安管理处罚法》',art:'第五十八条',subj:'噪声扰民',cat:'治安管理',kws:['噪音','噪声','扰民','装修','广场舞'],text:'违反关于社会生活噪声污染防治的法律规定，制造噪声干扰他人正常生活的，处警告；警告后不改正的，处二百元以上五百元以下罚款。'},
+ {id:'m1245',law:'《民法典》',art:'第一千二百四十五条',subj:'饲养动物损害',cat:'民法典',kws:['狗咬人','宠物伤人','犬','遛狗','狗'],text:'饲养的动物造成他人损害的，动物饲养人或者管理人应当承担侵权责任；但是，能够证明损害是因被侵权人故意或者重大过失造成的，可以不承担或者减轻责任。'},
+ {id:'a75',law:'《治安管理处罚法》',art:'第七十五条',subj:'饲养动物',cat:'治安管理',kws:['养犬','狗','犬','遛狗'],text:'饲养动物，干扰他人正常生活的，处警告；警告后不改正的，或者放任动物恐吓他人的，处二百元以上五百元以下罚款。（节引）'},
+ {id:'m703',law:'《民法典》',art:'第七百零三条',subj:'租赁合同',cat:'民法典',kws:['租房','租赁','出租','押金'],text:'租赁合同是出租人将租赁物交付承租人使用、收益，承租人支付租金的合同。'},
+ {id:'m721',law:'《民法典》',art:'第七百二十一条',subj:'租金支付',cat:'民法典',kws:['租金','租房','押金','欠租'],text:'承租人应当按照约定的期限支付租金。对支付租金的期限没有约定或者约定不明确，租赁期限不满一年的，应当在租赁期限届满时支付。（节引）'},
+ {id:'c266',law:'《刑法》',art:'第二百六十六条',subj:'诈骗罪',cat:'刑法',kws:['诈骗','骗','转账','刷单'],text:'诈骗公私财物，数额较大的，处三年以下有期徒刑、拘役或者管制，并处或者单处罚金；数额巨大或者有其他严重情节的，处三年以上十年以下有期徒刑，并处罚金。（节引）'},
+ {id:'c55',law:'《消费者权益保护法》',art:'第五十五条',subj:'惩罚性赔偿',cat:'消保',kws:['假货','欺诈','退一赔三','消费维权'],text:'经营者提供商品或者服务有欺诈行为的，应当按照消费者的要求增加赔偿其受到的损失，增加赔偿的金额为消费者购买商品的价款或者接受服务的费用的三倍。（节引）'},
+ {id:'x33',law:'《宪法》',art:'第三十三条',subj:'平等权',cat:'宪法',kws:['平等','权利','公民'],text:'凡具有中华人民共和国国籍的人都是中华人民共和国公民。中华人民共和国公民在法律面前一律平等。（节引）'},
+ {id:'m1165',law:'《民法典》',art:'第一千一百六十五条',subj:'过错责任',cat:'民法典',kws:['侵权','赔偿','过错'],text:'行为人因过错侵害他人民事权益造成损害的，应当承担侵权责任。'}
+];
+const UPLOADED=[
+ {id:'u1',law:'演示文档 · 劳动争议案例汇编',art:'节选',subj:'案例·演示',cat:'导入',tagNew:true,kws:[],text:'（模拟入库条目）本条目用于演示「上传扩充知识库」流程，内容为占位说明，不代表真实法规文本；接入真实解析管线后此处将展示入库条文。'},
+ {id:'u2',law:'演示文档 · 物业纠纷调解指引',art:'节选',subj:'指引·演示',cat:'导入',tagNew:true,kws:[],text:'（模拟入库条目）本条目用于演示「上传扩充知识库」流程；实际产品中上传的文档经解析、切分后进入检索与判断引用链路。'}
+];
+const CATS=['全部','劳动法系','民法典','治安管理','刑法','消保','宪法'];
+
+/* ================= 状态与工具 ================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let recent=[],catFilter='全部',statuteCount=1286,libBuilt=false,uploading=false;
+
+const scrollTop=()=>window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+function go(v){ if(location.hash!=='#/'+v) location.hash='#/'+v; else render(); }
+function syncBodyMode(){
+  const compact=$('#view-search').classList.contains('compact')||$('#view-judge').classList.contains('compact');
+  document.body.classList.toggle('serpmode',compact);
+}
+function setCompact(v,on){ $('#view-'+v).classList.toggle('compact',on); syncBodyMode(); }
+
+/* ================= 渲染：路由 ================= */
+function render(){
+  const v=(location.hash.replace('#/','')||'search');
+  const view=['search','judge','library'].includes(v)?v:'search';
+  $$('.view').forEach(s=>s.classList.toggle('active',s.dataset.view===view));
+  $$('nav a').forEach(a=>a.classList.toggle('on',a.dataset.view===view));
+  $('#footView').textContent={search:'法条检索',judge:'行为判断',library:'知识库'}[view];
+  syncBodyMode();
+  if(view==='library'&&!libBuilt){ libBuilt=true; buildLibrary(); }
+  window.scrollTo({top:0,behavior:'auto'});
+}
+
+/* ================= 行为判断：左输入面板 + 右分析图谱 ================= */
+const GRAPH_COLS=[['act'],['def'],['s0','s1'],['pun','risk']];
+const GRAPH_EDGES=[['act','def'],['def','s0'],['def','s1'],['s0','pun'],['s1','pun'],['pun','risk']];
+function buildNodes(J){
+  const c=(i,k)=>(J.cps[i].card.find(r=>r[0]===k)||['',''])[1];
+  const sec=J.cps[1].card.find(r=>['配套条文','民事层面','刑事衔接'].includes(r[0]));
+  return {
+    act:{tag:'行为',cls:'t-act',title:J.name,sub:c(0,'行为名称'),root:true,rows:J.cps[0].card},
+    def:{tag:'定性',cls:'',title:c(0,'定性结论'),sub:J.cps[0].d,rows:J.cps[0].card},
+    s0:{tag:'主条文',cls:'t-law',title:c(1,'法律依据'),sub:c(1,'条文摘引'),rows:J.cps[1].card,lib:J.lib,q:J.q},
+    s1:{tag:sec?sec[0]:'关联条文',cls:'t-law',title:sec?sec[1]:'',sub:sec?sec[0]:'',rows:J.cps[1].card,lib:J.lib2,q:J.q},
+    pun:{tag:'处罚',cls:'t-pun',title:'处罚与责任',sub:J.cps[2].d,rows:J.cps[2].card},
+    risk:{tag:'风险',cls:'t-risk',title:'风险提示',sub:J.cps[3].d,rows:J.cps[3].card}
+  };
+}
+function runJudgment(jid){
+  const J=JUDGMENTS[jid]; curJ=jid;
+  $('#judgeInput').value=J.name;
+  const N=buildNodes(J);
+  $('#ghead').hidden=false; $('#gname').textContent=J.name;
+  $('#gempty').hidden=true; $('#gnotice').hidden=true; $('#gdetail').hidden=true;
+  $('#gcols').innerHTML=GRAPH_COLS.map((col,ci)=>`<div class="gcol">${col.map(id=>{
+    const n=N[id];
+    return `<button class="gnode${n.root?' root':''}" id="g-${id}" data-node="${id}" style="--i:${ci}" aria-label="查看${n.tag}节点：${esc(n.title)}">
+      <span class="gtag ${n.cls}">${n.tag}</span>
+      <b class="gtitle">${esc(n.title)}</b>
+      <span class="gsub">${esc(n.sub)}</span></button>`;
+  }).join('')}</div>`).join('');
+  requestAnimationFrame(()=>{ drawEdges(); selectNode('def'); });
+  scrollTop();
+}
+function drawEdges(){
+  const canvas=$('#gcanvas'),svg=$('#graphSvg');
+  if(!$('#gcols').children.length){ svg.innerHTML=''; return; }
+  const w=canvas.offsetWidth,h=canvas.offsetHeight;
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  const cr=canvas.getBoundingClientRect();
+  const pt=(el,side)=>{ const r=el.getBoundingClientRect(); return {x:(side==='r'?r.right:r.left)-cr.left,y:r.top+r.height/2-cr.top}; };
+  svg.innerHTML=`<defs><marker id="garr" viewBox="0 0 8 8" refX="6.5" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L8,4L0,8z" fill="#3D5CE5" opacity=".5"/></marker></defs>`
+    +GRAPH_EDGES.map(([a,b],i)=>{
+      const p1=pt($('#g-'+a),'r'),p2=pt($('#g-'+b),'l');
+      if(p2.x-p1.x<8) return '';
+      const dx=Math.max(28,(p2.x-p1.x)/2);
+      return `<path pathLength="1" marker-end="url(#garr)" style="--d:${.12+i*.09}s" d="M${p1.x},${p1.y} C${p1.x+dx},${p1.y} ${p2.x-dx},${p2.y} ${p2.x-4},${p2.y}"/>`;
+    }).join('');
+}
+function selectNode(id){
+  $$('#gcols .gnode').forEach(n=>n.classList.toggle('sel',n.dataset.node===id));
+  const J=JUDGMENTS[curJ]; if(!J) return;
+  const n=buildNodes(J)[id]; if(!n||!n.title) return;
+  $('#gdetail').hidden=false;
+  $('#gdetail').innerHTML=`<div class="gdhead"><span class="gtag ${n.cls}">${n.tag}</span><b>${esc(n.title)}</b>
+    <span class="gdact">${n.lib?`<button class="mini" data-open-lib="${n.lib}">在知识库查看</button><button class="mini" data-q="${n.q}">去检索</button>`:''}</span></div>
+    <dl class="jrows">${n.rows.map(r=>`<div class="jrow"><dt>${r[0]}</dt><dd>${r[1]}${r[2]?`<small>${r[2]}</small>`:''}</dd></div>`).join('')}</dl>`;
+}
+function judgeSubmit(){
+  const q=$('#judgeInput').value.trim();
+  if(!q){ $('#judgeInput').focus(); return; }
+  const hit=PRESET_KEYS.find(([re])=>new RegExp(re).test(q));
+  if(hit){ runJudgment(hit[1]); return; }
+  $('#ghead').hidden=false; $('#gname').textContent=q;
+  $('#gempty').hidden=true; $('#gcols').innerHTML=''; $('#graphSvg').innerHTML=''; $('#gdetail').hidden=true;
+  $('#gnotice').hidden=false;
+  $('#gnotice').innerHTML=`<div class="notice">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="#3D5CE5" stroke-width="2"/><path d="M15.5 15.5 21 21" stroke="#3D5CE5" stroke-width="2" stroke-linecap="round"/><path d="M7.5 10.5h6" stroke="#3D5CE5" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <b>演示原型暂未收录「${esc(q)}」的判断路线</b>
+    <p>试试下方示例行为，或先到 <a class="linklike" href="#/search" data-goto="search">法条检索</a> 查条文。</p>
+    <div class="chips"><button class="chip" data-j="j1">拖欠工资</button><button class="chip" data-j="j2">网上辱骂</button><button class="chip" data-j="j3">高空抛物</button></div>
+  </div>`;
+  scrollTop();
+}
+function resetJudge(){
+  $('#judgeInput').value=''; $('#judgeInput').focus();
+  $('#ghead').hidden=true; $('#gnotice').hidden=true; $('#gdetail').hidden=true;
+  $('#gcols').innerHTML=''; $('#graphSvg').innerHTML=''; $('#gempty').hidden=false;
+}
+
+/* ================= 法条检索 ================= */
+function hlText(text,kws){
+  const uniq=[...new Set(kws.filter(k=>k.length>0))].sort((a,b)=>b.length-a.length);
+  if(!uniq.length) return esc(text);
+  const re=new RegExp('('+uniq.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')','g');
+  return esc(text).replace(re,'<b class="hl">$1</b>');
+}
+function doSearch(q){
+  q=(q||'').trim();
+  if(!q){ $('#searchInput').focus(); return; }
+  $('#searchInput').value=q;
+  recent=[q,...recent.filter(r=>r!==q)].slice(0,4); renderRecent();
+  setCompact('search',true); scrollTop();
+  const hits=STATUTES.map(s=>{
+    const mk=s.kws.filter(k=>q.includes(k)||k.includes(q));
+    return mk.length?{s,mk,score:Math.min(97,84+6*Math.min(mk.length,2)+(q.includes(s.subj.slice(0,2))?4:0))}:null;
+  }).filter(Boolean).sort((a,b)=>b.score-a.score);
+  const t=(q.length*37%280+140)/1000;
+  const finish=()=>{
+    $('#loadbar').hidden=true;
+    if(!hits.length){
+      $('#searchMeta').innerHTML=`关键词「${esc(q)}」 · 演示数据 <button class="linklike" data-reset="search">重新输入</button>`;
+      $('#searchList').innerHTML=`<div class="notice">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="#4E6EF2" stroke-width="2"/><path d="M15.5 15.5 21 21" stroke="#4E6EF2" stroke-width="2" stroke-linecap="round"/><path d="M7.5 10.5h6" stroke="#4E6EF2" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <b>演示库未收录「${esc(q)}」</b>
+        <p>原型只内置部分常见场景法条。换个更具体的关键词，或试试：</p>
+        <div class="chips"><button class="chip" data-q="拖欠工资">拖欠工资</button><button class="chip" data-q="高空抛物">高空抛物</button><button class="chip" data-q="噪音扰民">噪音扰民</button></div>
+      </div>`;
+      return;
+    }
+    $('#searchMeta').innerHTML=`关键词「${esc(q)}」 · 命中 ${hits.length} 条 · 演示检索 ${t.toFixed(2)} s · 演示数据`;
+    $('#searchList').innerHTML=hits.map((h,i)=>`
+      <article class="r" style="--i:${i}">
+        <h3><button class="rtitle" data-open-lib="${h.s.id}" aria-label="在知识库查看 ${esc(h.s.law)}${esc(h.s.art)}">${h.s.law}${h.s.art}<span class="rsubj">（${esc(h.s.subj)}）</span></button></h3>
+        <div class="rsrc"><span class="tag">${h.s.cat}</span><span>演示法条库 · 精选节引</span><span class="rscore">相关度 ${h.score}%</span></div>
+        <p class="rquote">${hlText(h.s.text,h.mk)}</p>
+        <div class="ract">
+          ${h.s.jid?`<button class="mini pri" data-jump-j="${h.s.jid}">判相关行为</button>`:''}
+          <button class="mini" data-open-lib="${h.s.id}">在知识库查看</button>
+        </div>
+      </article>`).join('');
+  };
+  $('#searchMeta').innerHTML=`关键词「${esc(q)}」 · 正在检索演示法条库…`;
+  $('#searchList').innerHTML='';
+  $('#loadbar').hidden=false;
+  reduced?finish():setTimeout(finish,700);
+}
+function renderRecent(){
+  $('#recentBox').innerHTML=recent.length
+    ?recent.map(r=>`<button class="rrow" data-q="${esc(r)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="#5F6672" stroke-width="2"/><path d="M12 7v5l3 2" stroke="#5F6672" stroke-width="2" stroke-linecap="round"/></svg><b>${esc(r)}</b><em>重新检索</em></button>`).join('')
+    :'<p class="none">暂无检索记录，试试上方示例关键词</p>';
+}
+
+/* ================= 知识库 ================= */
+function cn2num(s){
+  const m=s.match(/[零一二两三四五六七八九十百千]+/); if(!m) return null;
+  const D={'零':0,'一':1,'二':2,'两':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9},U={'十':10,'百':100,'千':1000};
+  let num=0,cur=0;
+  for(const ch of m[0]){
+    if(D[ch]!=null) cur=D[ch];
+    else{ num+=(cur||1)*U[ch]; cur=0; }
+  }
+  return num+cur;
+}
+function artNum(s){
+  const n=cn2num(s.art);
+  return n!=null?String(n):(s.tagNew?'＋':'§');
+}
+function buildLibrary(){ renderCatChips(); renderLibrary(); }
+function renderCatChips(){
+  const counts={}; [...STATUTES,...UPLOADED].forEach(s=>counts[s.cat]=(counts[s.cat]||0)+1);
+  $('#catChips').innerHTML=CATS.filter(c=>c==='全部'||counts[c]).map(c=>{
+    const n=c==='全部'?STATUTES.length+UPLOADED.length:counts[c];
+    return `<button class="chip${catFilter===c?' on':''}" data-cat="${c}" aria-pressed="${catFilter===c}">${c}<span class="n num-tab">${n}</span></button>`;
+  }).join('');
+}
+function libRow(s,i){
+  return `<article class="lrow" id="lib-${s.id}" style="--i:${i}">
+    <div class="lt"><b>${s.law}${s.art}</b><span class="subj">${s.subj}</span>
+      <span class="tag">${s.cat}</span>${s.tagNew?'<span class="tag amber">新导入 · 演示</span>':''}</div>
+    <p class="q">${esc(s.text)}</p>
+    <div class="ract">${s.jid?`<button class="mini pri" data-jump-j="${s.jid}">判相关行为</button>`:''}
+      <button class="mini" data-lib-search="${esc(s.subj)}">去检索</button></div>
+  </article>`;
+}
+function renderLibrary(){
+  const all=[...UPLOADED,...STATUTES];
+  const list=all.filter(s=>catFilter==='全部'||s.cat===catFilter);
+  const groupOrder=['导入',...CATS.slice(1)];
+  const groups=catFilter==='全部'?groupOrder.filter(g=>list.some(s=>s.cat===g)):[catFilter];
+  let i=0;
+  $('#libList').innerHTML=`<p class="meta">${catFilter==='全部'?`按法规分类 · ${groups.length} 组`:esc(catFilter)} · 共 ${list.length} 条 · 演示数据</p>`
+    +groups.map(g=>`<div class="lgroup"><h2>${g}<span class="num-tab">${list.filter(s=>s.cat===g).length} 条</span></h2>${list.filter(s=>s.cat===g).map(s=>libRow(s,i++)).join('')}</div>`).join('');
+}
+function setFilter(c){ catFilter=c; renderCatChips(); renderLibrary(); }
+function expandRow(id,{flash=false}={}){
+  const row=$('#lib-'+id); if(!row) return;
+  if(flash){ row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash'); row.scrollIntoView({block:'center',behavior:reduced?'auto':'smooth'}); }
+}
+function doUpload(name){
+  if(uploading) return; uploading=true;
+  const log=$('#uplog'),fill=$('#upFill'),txt=$('#upTxt');
+  $('#upName').textContent=name; log.hidden=false; fill.style.width='0%'; txt.textContent='0%';
+  let p=0;
+  const timer=setInterval(()=>{
+    p=Math.min(100,p+7+Math.random()*9);
+    fill.style.width=p+'%'; txt.textContent=Math.floor(p)+'% · '+(p<55?'解析中…':'切分入库…');
+    if(p>=100){
+      clearInterval(timer); txt.textContent='已入库 · 新增 2 条（演示）';
+      statuteCount+=2; const b=$('#badgeCount');
+      b.textContent=statuteCount.toLocaleString();
+      const badge=$('#badge'); badge.classList.remove('tick'); void badge.offsetWidth; badge.classList.add('tick');
+      setTimeout(()=>{ UPLOADED.forEach(u=>u.tagNew=true); if(catFilter!=='全部'&&catFilter!=='导入'){ setFilter('全部'); } else { renderCatChips(); renderLibrary(); }
+        UPLOADED.forEach(u=>expandRow(u.id,{flash:true})); uploading=false; },500);
+    }
+  },reduced?10:110);
+}
+
+/* ================= 事件绑定 ================= */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-goto],[data-j],[data-q],[data-cat],[data-jump-j],[data-open-lib],[data-lib-search],[data-reset]');
+  if(!t) return;
+  if(t.dataset.goto){ go(t.dataset.goto); return; }
+  if(t.dataset.j){ go('judge'); runJudgment(t.dataset.j); return; }
+  if(t.dataset.q){ go('search'); doSearch(t.dataset.q); return; }
+  if(t.dataset.cat){ setFilter(t.dataset.cat); return; }
+  if(t.dataset.jumpJ){ go('judge'); runJudgment(t.dataset.jumpJ); return; }
+  if(t.dataset.openLib){ go('library'); setTimeout(()=>expandRow(t.dataset.openLib,{flash:true}),80); return; }
+  if(t.dataset.libSearch){ go('search'); doSearch(t.dataset.libSearch); return; }
+  if(t.dataset.reset==='judge'){ resetJudge(); return; }
+  if(t.dataset.reset==='search'){ setCompact('search',false); const i=$('#searchInput'); i.value=''; i.focus(); scrollTop(); return; }
+});
+function goHome(e){
+  if(e) e.preventDefault();
+  go('search'); setCompact('search',false); setCompact('judge',false);
+  window.scrollTo({top:0,behavior:'auto'});
+}
+$('#brandHome').addEventListener('click',goHome);
+$$('.serpLogo').forEach(a=>a.addEventListener('click',goHome));
+$('#judgeGo').addEventListener('click',judgeSubmit);
+$('#judgeInput').addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)) judgeSubmit(); });
+$('#gcols').addEventListener('click',e=>{ const n=e.target.closest('.gnode'); if(n) selectNode(n.dataset.node); });
+let gRsz; window.addEventListener('resize',()=>{ clearTimeout(gRsz); gRsz=setTimeout(()=>{ if($('#view-judge').classList.contains('active')&&$('#gcols').children.length) drawEdges(); },120); });
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ if($('#view-judge').classList.contains('active')&&$('#gcols').children.length) drawEdges(); });
+$('#searchGo').addEventListener('click',()=>doSearch($('#searchInput').value));
+$('#searchInput').addEventListener('keydown',e=>{ if(e.key==='Enter') doSearch($('#searchInput').value); });
+/* 模拟上传 */
+const drop=$('#drop');
+drop.addEventListener('click',()=>doUpload('演示文件_劳动争议案例汇编.pdf'));
+['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+drop.addEventListener('drop',e=>{
+  const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];
+  doUpload(f?f.name:'演示文件_劳动争议案例汇编.pdf');
+});
+window.addEventListener('hashchange',render);
+render();
+/* 深链：?q=关键词 直接打开检索并执行；?j=jid 直接打开判断 */
+const params=new URLSearchParams(location.search);
+const q0=params.get('q');
+if(q0){ go('search'); setTimeout(()=>doSearch(q0),reduced?0:150); }
+const j0=params.get('j');
+if(j0&&JUDGMENTS[j0]){ go('judge'); setTimeout(()=>runJudgment(j0),reduced?0:(q0?900:150)); }
+</script>
+</body>
+</html>

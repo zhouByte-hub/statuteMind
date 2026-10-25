@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>statuteMind · 法规智能引擎 — 立案检索台（卷宗宗卷）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1440px;height:900px;overflow:hidden;display:flex;flex-direction:column;background:#e9dcc3;background-image:repeating-linear-gradient(0deg,rgba(43,38,32,.025) 0 1px,transparent 1px 26px);color:#2b2620;font-family:'Noto Sans SC',sans-serif}
+.tw{font-family:'Courier Prime',monospace}
+header{height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-bottom:2px solid #2b2620}
+.brand{display:flex;align-items:center;gap:11px}
+.seal{width:32px;height:32px;border:4px double #b7352c;border-radius:50%;color:#b7352c;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif SC',serif;font-weight:700;font-size:14px;transform:rotate(-10deg)}
+.brand b{font-family:'Noto Serif SC',serif;font-size:21px;letter-spacing:.5px}
+.brand span{font-size:13px;color:#33506b;font-weight:500}
+.badge{font-family:'Courier Prime',monospace;font-size:12px;color:#33506b;border:1.5px solid #33506b;border-radius:3px;padding:4px 11px;background:rgba(51,80,107,.07)}
+.wrap{flex:1;display:flex;min-height:0}
+aside.cabinet{width:264px;flex:none;border-right:2px solid #2b2620;padding:26px 22px 0;background:rgba(201,177,140,.22)}
+.cab-head{font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:4px;color:#33506b;border-bottom:1.5px dashed rgba(51,80,107,.6);padding-bottom:9px}
+.drawer{position:relative;margin-top:24px;border:1.5px solid #2b2620;border-radius:2px 4px 3px 3px;background:#e3d4b5;padding:15px 16px 12px;box-shadow:2px 3px 0 rgba(43,38,32,.13)}
+.drawer::before{content:"";position:absolute;top:-14px;left:12px;width:84px;height:13px;background:#c9b18c;border:1.5px solid #2b2620;border-bottom:none;border-radius:6px 6px 0 0}
+.drawer .code{font-family:'Courier Prime',monospace;font-size:10px;color:#33506b;letter-spacing:1.5px}
+.drawer b{display:block;font-family:'Noto Serif SC',serif;font-size:17px;margin:3px 0 2px}
+.drawer em{font-style:normal;font-size:11px;color:#6f6650}
+.drawer.on{background:#f3ead6;border-width:2px;box-shadow:3px 4px 0 rgba(43,38,32,.18)}
+.drawer.on::before{background:#b7352c}
+.drawer.on .code{color:#b7352c}
+main{flex:1;min-width:0;padding:22px 30px 14px;display:flex;flex-direction:column;gap:16px}
+.filing{display:flex;align-items:center;gap:18px;border:2px solid #2b2620;background:#f3ead6;padding:14px 20px;box-shadow:3px 4px 0 rgba(43,38,32,.14)}
+.f-label{font-family:'Noto Serif SC',serif;font-weight:700;font-size:16px;padding-right:18px;border-right:2px dashed rgba(183,53,44,.5)}
+.slip{flex:1;display:flex;align-items:center;gap:12px}
+.slip input{flex:1;height:40px;border:none;border-bottom:2.5px solid rgba(51,80,107,.65);background:transparent;font-family:'Noto Serif SC',serif;font-size:16px;color:#2b2620;outline:none}
+.slip input::placeholder{color:#8b7f60}
+.btn{height:40px;padding:0 20px;font-family:'Noto Sans SC',sans-serif;font-size:14px;font-weight:500;border:1.5px solid #2b2620;background:transparent;color:#2b2620;border-radius:3px}
+.btn.red{background:#b7352c;border-color:#b7352c;color:#f3ead6;font-weight:700;box-shadow:2px 2px 0 rgba(43,38,32,.22)}
+.sec{display:flex;align-items:baseline;gap:14px}
+.sec h2{font-family:'Noto Serif SC',serif;font-size:16px;font-weight:700;display:inline-block;border-bottom:3px solid rgba(51,80,107,.6);padding-bottom:2px;transform:rotate(-.6deg)}
+.sec .tw{font-size:11px;color:#33506b;letter-spacing:2.5px}
+.files{flex:1;min-height:0;position:relative;padding-left:38px;display:flex;flex-direction:column;gap:16px}
+.files::before{content:"装 订 线";position:absolute;left:9px;top:4px;bottom:4px;writing-mode:vertical-rl;font-size:10px;letter-spacing:7px;color:rgba(51,80,107,.55);border-left:1.5px dashed rgba(51,80,107,.45);padding-top:4px}
+.row{display:flex;gap:16px;flex:1}
+.row+.row{flex:1.12}
+.doc{position:relative;flex:1;display:flex;flex-direction:column;background:#f6eeda;border:1.5px solid #2b2620;box-shadow:2px 4px 0 rgba(43,38,32,.15);padding:14px 20px 12px}
+.doc.main{flex:1.35}
+.doc-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px dashed rgba(43,38,32,.35);padding-bottom:8px}
+.doc-head .no{font-family:'Courier Prime',monospace;font-size:12.5px;font-weight:700;color:#33506b;letter-spacing:1px}
+.doc-head .kind{font-family:'Courier Prime',monospace;font-size:10px;color:#6f6650;letter-spacing:2px}
+.body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:7px;padding-top:6px}
+.field{display:flex;gap:14px;font-size:15px;line-height:1.8;align-items:baseline}
+.field .k{flex:none;color:#6f6650;font-size:12.5px;letter-spacing:3px}
+.field b{font-family:'Noto Serif SC',serif;font-weight:600}
+.pen{border-bottom:2.5px solid rgba(51,80,107,.65);padding-bottom:1px}
+.doc h3{font-family:'Noto Serif SC',serif;font-size:16px;font-weight:700;margin-bottom:5px}
+.quote{font-family:'Noto Serif SC',serif;font-size:14px;line-height:1.95}
+.stamp{position:absolute;top:38px;right:18px;transform:rotate(-9deg);border:4px double #b7352c;color:#b7352c;border-radius:6px;padding:4px 13px 3px;text-align:center;font-family:'Noto Serif SC',serif;font-weight:700;font-size:20px;letter-spacing:5px;background:rgba(183,53,44,.05);opacity:.9}
+.stamp small{display:block;font-family:'Courier Prime',monospace;font-weight:400;font-size:7.5px;letter-spacing:1.5px;margin-top:2px}
+.clip{position:absolute;top:-9px;left:34px;width:15px;height:32px;border:3px solid #8d8672;border-radius:8px;transform:rotate(9deg)}
+.clip::after{content:"";position:absolute;left:2px;top:13px;width:5px;height:15px;border:3px solid #8d8672;border-top:none;border-radius:0 0 4px 4px}
+.sign{margin-top:auto;padding-top:8px;text-align:right;font-family:'Courier Prime',monospace;font-size:10px;color:#6f6650;letter-spacing:1px}
+.bar{flex:1;display:flex;flex-direction:column;border:2px solid #2b2620;background:#f3ead6;box-shadow:2px 3px 0 rgba(43,38,32,.14);padding:13px 18px 11px}
+.bar h4{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:700;border-bottom:1.5px dashed rgba(43,38,32,.3);padding-bottom:7px}
+.bar.risk h4{color:#b7352c}
+.bar ul{flex:1;display:flex;flex-direction:column;justify-content:space-evenly;padding-top:4px}
+.bar li{list-style:none;font-size:13px;line-height:1.7}
+.bar li i{font-style:normal;font-family:'Courier Prime',monospace;color:#33506b;margin-right:9px;font-size:11px}
+.bar.risk li i{color:#b7352c}
+footer{flex:none;height:38px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;border-top:1.5px dashed rgba(43,38,32,.5);font-size:11.5px;color:#6f6650}
+footer .tw{color:#33506b;font-size:10px;letter-spacing:1.5px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="seal">档</span><b>statuteMind</b><span>· 法规智能引擎</span></div>
+  <div class="badge">演示数据 · 内置 1,286 条法条</div>
+</header>
+<div class="wrap">
+  <aside class="cabinet">
+    <div class="cab-head">档案柜 · ARCHIVE CABINET</div>
+    <div class="drawer"><span class="code">A-01</span><b>检索台</b><em>法条检索 · RETRIEVAL</em></div>
+    <div class="drawer on"><span class="code">A-02</span><b>判断卷</b><em>行为定案 · 1 卷在办</em></div>
+    <div class="drawer"><span class="code">A-03</span><b>知识库</b><em>归档条目 · ARCHIVE</em></div>
+  </aside>
+  <main>
+    <section class="filing">
+      <span class="f-label">立案登记</span>
+      <div class="slip">
+        <input type="text" placeholder="公司拖欠工资 3 个月怎么办">
+        <button type="button" class="btn">搜法条</button>
+        <button type="button" class="btn red">判行为</button>
+      </div>
+    </section>
+    <div class="sec"><h2>卷内文件</h2><span class="tw">IN-FILE DOCUMENTS · 本卷共 3 页</span></div>
+    <div class="files">
+      <div class="row">
+        <article class="doc main">
+          <div class="clip"></div>
+          <div class="doc-head"><span class="no">档号 SM-2026-0047</span><span class="kind">卷内文件 · 判断结论</span></div>
+          <div class="body">
+            <div class="field"><span class="k">行为定性</span><b>拖欠劳动报酬（无故拖欠）</b></div>
+            <div class="field"><span class="k">结　　论</span><b>违反<span class="pen">《中华人民共和国劳动合同法》第三十条</span></b></div>
+          </div>
+          <div class="sign">经办：立案检索台 · 2026-10-11</div>
+          <div class="stamp">已立案<small>STATUTEMIND · CASE FILED</small></div>
+        </article>
+        <article class="doc">
+          <div class="doc-head"><span class="no">附件一</span><span class="kind">法条摘录</span></div>
+          <div class="body">
+            <h3>《劳动合同法》第三十条</h3>
+            <p class="quote">「用人单位应当按照劳动合同约定和国家规定，向劳动者及时足额支付劳动报酬。」</p>
+          </div>
+        </article>
+      </div>
+      <div class="row">
+        <article class="doc">
+          <div class="doc-head"><span class="no">附件二</span><span class="kind">法条摘录</span></div>
+          <div class="body">
+            <h3>《劳动合同法》第八十五条（节引）</h3>
+            <p class="quote">「由劳动行政部门责令限期支付……逾期不支付的，责令按应付金额百分之五十以上百分之一百以下的标准向劳动者加付赔偿金。」</p>
+          </div>
+        </article>
+        <section class="bar">
+          <h4>处理意见</h4>
+          <ul>
+            <li><i>01</i>责令限期支付</li>
+            <li><i>02</i>逾期按应付金额 50%–100% 加付赔偿金</li>
+            <li><i>03</i>劳动者可申请劳动仲裁</li>
+          </ul>
+        </section>
+        <section class="bar risk">
+          <h4>风险提示</h4>
+          <ul>
+            <li><i>01</i>仲裁时效一年</li>
+            <li><i>02</i>保留工资条与考勤记录</li>
+            <li><i>03</i>可拨打 12333 投诉</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<footer>
+  <span>※ 免责：演示数据，仅供参考，不构成法律意见</span>
+  <span class="tw">SM · 卷宗宗卷 FILE WORLD · 第 1 卷</span>
+</footer>
+</body>
+</html>

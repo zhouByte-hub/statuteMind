@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>statuteMind · 找到你的法律路线</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1440px;height:900px;overflow:hidden;background:#f5f4ee;color:#26251f;font-family:'Noto Sans SC',sans-serif;display:flex;flex-direction:column}
+.top{height:54px;flex:none;display:flex;align-items:center;gap:14px;padding:0 28px;border-bottom:1px solid rgba(38,37,31,.22)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:17px}
+.brand span{font-weight:500;font-size:12px;color:rgba(38,37,31,.6)}
+.top nav{margin-left:34px;display:flex;gap:28px;font-size:13px}
+.top nav a{text-decoration:none;color:rgba(38,37,31,.65);padding:18px 2px 16px;border-bottom:2px solid transparent}
+.top nav a.on{color:#6d4fa1;font-weight:700;border-color:#6d4fa1}
+.badge{margin-left:auto;font-size:11px;padding:4px 12px;border:1px solid rgba(38,37,31,.3);border-radius:999px;color:rgba(38,37,31,.65)}
+.badge b{color:#6d4fa1}
+.hero{flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:18px 28px 16px;border-bottom:1px solid rgba(38,37,31,.22)}
+.hero h1{font-family:'ZCOOL QingKe HuangYou',sans-serif;font-weight:400;font-size:42px;letter-spacing:.05em;line-height:1}
+.hero h1 em{font-style:normal;color:#6d4fa1}
+.hero p{font-size:12px;color:rgba(38,37,31,.6);text-align:right;line-height:1.8}
+main{flex:1;display:flex;min-height:0}
+aside{width:400px;flex:none;border-right:1px solid rgba(38,37,31,.22);padding:16px 22px;display:flex;flex-direction:column;gap:15px;overflow:hidden}
+.sec h2{font-size:11px;font-weight:700;letter-spacing:.24em;color:rgba(38,37,31,.5);display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sec h2::after{content:"";flex:1;height:1px;background:rgba(38,37,31,.15)}
+.modes{display:inline-flex;border:1px solid rgba(38,37,31,.3);border-radius:8px;padding:3px;margin-bottom:9px}
+.modes button{border:0;background:none;font:500 12px 'Noto Sans SC',sans-serif;padding:5px 16px;border-radius:6px;color:rgba(38,37,31,.6)}
+.modes button.on{background:#6d4fa1;color:#fff;font-weight:700}
+.bar{display:flex;gap:8px}
+.bar input{flex:1;border:1px solid rgba(38,37,31,.35);border-radius:8px;background:#fff;padding:10px 12px;font:400 13px 'Noto Sans SC',sans-serif;color:#26251f}
+.bar input::placeholder{color:rgba(38,37,31,.38)}
+.bar button{border:0;background:#6d4fa1;color:#fff;font:700 13px 'Noto Sans SC',sans-serif;letter-spacing:.1em;padding:0 18px;border-radius:8px}
+.hint{font-size:11px;color:rgba(38,37,31,.5);margin-top:8px;line-height:1.6}
+.hint b{color:#6d4fa1}
+.prog{display:flex;align-items:center;gap:10px;font-size:11px;color:rgba(38,37,31,.55);margin-bottom:8px}
+.prog i{flex:1;height:5px;background:rgba(38,37,31,.12);border-radius:99px;overflow:hidden}
+.prog i b{display:block;width:50%;height:100%;background:#6d4fa1}
+.cp{display:flex;gap:11px;padding:8px 10px;border-radius:9px;border:1px solid transparent}
+.cp.cur{background:rgba(109,79,161,.07);border-color:rgba(109,79,161,.4)}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:900;border:2px solid #6d4fa1;color:#6d4fa1;background:#f5f4ee}
+.cp.cur .dot,.dot.cur{background:#6d4fa1;color:#fff}
+.cp.todo .dot{border-style:dashed;color:rgba(109,79,161,.75)}
+.cname{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+.cname i{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.08em;padding:1px 7px;border-radius:99px}
+.cp.done .cname i{background:rgba(168,160,106,.28);color:#6f6a41}
+.cp.cur .cname i{background:#6d4fa1;color:#fff}
+.cp.todo .cname i{border:1px solid rgba(38,37,31,.3);color:rgba(38,37,31,.55)}
+.cdetail{font-size:11.5px;line-height:1.55;color:rgba(38,37,31,.6);margin-top:2px}
+.lrow{display:flex;align-items:center;gap:12px;padding:6px 2px;border-bottom:1px dashed rgba(38,37,31,.15);font-size:12px}
+.lrow:last-child{border-bottom:0}
+.sw{width:44px;flex:none;display:grid;place-items:center}
+.sw .c{width:18px;height:18px;border-radius:50%}
+.sw .c.f{background:#6d4fa1}
+.sw .c.o{border:2px solid #6d4fa1;background:#f5f4ee}
+.sw .ck{color:#6d4fa1;font-weight:900;font-size:15px}
+.lnr{display:flex;flex-direction:column;gap:3px}
+.lnr i{width:34px;height:0;border-top:2.5px solid #6d4fa1}
+.lnr i.d{border-top-style:dashed}
+.lrow em{font-style:normal;color:rgba(38,37,31,.45);font-size:10px;letter-spacing:.12em;margin-left:auto}
+.map{flex:1;position:relative;overflow:hidden}
+.map>svg{position:absolute;inset:0;width:100%;height:100%;font-family:'Noto Sans SC',sans-serif}
+.card{position:absolute;top:64px;right:22px;width:302px;background:#f5f4ee;border:1px solid rgba(38,37,31,.3);border-radius:12px;box-shadow:0 14px 34px rgba(38,37,31,.16);padding:15px 17px;animation:pop .5s .9s both}
+.chead{display:flex;align-items:center;gap:11px;padding-bottom:11px;border-bottom:1px solid rgba(38,37,31,.18)}
+.chead .dot{width:30px;height:30px;font-size:15px}
+.ctitle b{display:block;font-size:15.5px;font-weight:900}
+.ctitle span{font-size:10.5px;color:#6d4fa1;font-weight:700;letter-spacing:.12em}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:7px 0;border-bottom:1px dashed rgba(38,37,31,.16)}
+.row i{font-style:normal;font-size:11px;color:rgba(38,37,31,.5);flex:none}
+.row b{font-size:12.5px;font-weight:700;text-align:right}
+.row small{display:block;font-weight:500;font-size:11px;color:rgba(38,37,31,.55)}
+.go{display:block;width:100%;margin-top:13px;border:0;background:#6d4fa1;color:#fff;font:900 13px 'Noto Sans SC',sans-serif;letter-spacing:.14em;padding:12px;border-radius:9px}
+footer{flex:none;height:34px;display:flex;align-items:center;padding:0 28px;border-top:1px solid rgba(38,37,31,.22);font-size:11px;color:rgba(38,37,31,.5)}
+.solid{stroke-dasharray:700;stroke-dashoffset:700;animation:draw 2.4s .3s ease-out forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z" stroke="#6d4fa1" stroke-width="2" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke="#6d4fa1" stroke-width="2"/></svg>statuteMind<span>法规智能引擎</span></div>
+  <nav><a>法条检索</a><a class="on">行为判断</a><a>知识库</a></nav>
+  <span class="badge">演示数据 · 内置 <b>1,286</b> 条法条</span>
+</header>
+<section class="hero">
+  <h1>找到你的<em>法律路线</em></h1>
+  <p>一次判断 · 四个检查点<br>行为定性 → 法条匹配 → 处罚与责任 → 风险提示</p>
+</section>
+<main>
+  <aside>
+    <div class="sec">
+      <h2>法条库检索</h2>
+      <div class="modes"><button>搜法条</button><button class="on">判行为</button></div>
+      <div class="bar"><input type="text" placeholder="公司拖欠工资 3 个月怎么办"><button>开始判断</button></div>
+      <p class="hint"><b>判行为</b> · 描述一个行为，按检查点输出：引用条文 → 违法定性 → 处罚 → 风险提示</p>
+    </div>
+    <div class="sec">
+      <h2>推理路线</h2>
+      <div class="prog"><span>路线进度</span><i><b></b></i><span>2 / 4</span></div>
+      <div class="cp done"><span class="dot">✓</span><div><p class="cname">行为定性 <i>已完成</i></p><p class="cdetail">拖欠劳动报酬 — 事实清楚，构成违法</p></div></div>
+      <div class="cp done"><span class="dot">✓</span><div><p class="cname">法条匹配 <i>已完成</i></p><p class="cdetail">《劳动合同法》第三十条「用人单位应当按照劳动合同约定和国家规定，向劳动者及时足额支付劳动报酬。」</p></div></div>
+      <div class="cp cur"><span class="dot cur">3</span><div><p class="cname">处罚与责任 <i>当前</i></p><p class="cdetail">责令限期支付；逾期加付赔偿金；可申请劳动仲裁</p></div></div>
+      <div class="cp todo"><span class="dot">4</span><div><p class="cname">风险提示 <i>待办</i></p><p class="cdetail">仲裁时效一年；保留证据；热线 12333</p></div></div>
+    </div>
+    <div class="sec">
+      <h2>图例</h2>
+      <div class="lrow"><span class="sw"><span class="c f"></span></span>当前步骤<em>ACTIVE</em></div>
+      <div class="lrow"><span class="sw"><span class="c o"></span></span>待办<em>PLANNED</em></div>
+      <div class="lrow"><span class="sw"><span class="ck">✓</span></span>已完成<em>CLEARED</em></div>
+      <div class="lrow"><span class="sw"><span class="lnr"><i></i><i class="d"></i></span></span>已走 / 规划路线<em>COURSE</em></div>
+    </div>
+  </aside>
+  <section class="map">
+    <svg viewBox="0 0 1040 704" preserveAspectRatio="xMidYMid slice">
+      <g fill="none" stroke="#dedacd" stroke-width="1">
+        <path d="M175,415 C245,355 355,360 405,420 C455,480 435,565 345,595 C255,625 155,585 130,510 C112,458 135,450 175,415 Z"/>
+        <path d="M215,448 C265,408 345,412 380,452 C415,492 400,548 335,568 C270,588 200,558 185,508 C175,478 190,472 215,448 Z"/>
+        <path d="M252,473 C287,448 332,452 352,478 C372,504 362,534 322,544 C282,554 242,534 234,504 C229,487 237,483 252,473 Z" stroke="#d2cfc0"/>
+        <path d="M742,108 C782,78 852,83 882,118 C912,153 892,203 837,213 C782,223 722,193 717,153 C714,128 722,123 742,108 Z"/>
+        <path d="M772,130 C797,112 842,116 860,138 C878,160 866,190 830,197 C794,204 757,187 754,160 C752,145 758,142 772,130 Z"/>
+        <path d="M700,590 C750,562 838,566 876,598 C914,630 898,672 836,688 C774,704 698,682 684,636 C675,607 680,600 700,590 Z"/>
+        <path d="M60,300 C130,272 210,296 285,278 C330,268 355,258 380,240"/>
+        <path d="M460,120 C520,96 600,110 660,92 C700,80 720,70 745,52"/>
+      </g>
+      <path d="M45,58 C115,28 215,44 255,90 C295,136 262,198 182,214 C102,230 25,198 15,140 C9,100 12,78 45,58 Z" fill="#d9cf9a" opacity=".6"/>
+      <path d="M470,528 C540,494 645,502 695,542 C745,582 725,646 645,664 C565,682 462,662 437,612 C420,576 432,552 470,528 Z" fill="#d9cf9a" opacity=".85" stroke="#a8a06a" stroke-opacity=".45"/>
+      <path d="M262,652 C285,641 317,645 328,661 C339,677 324,692 296,695 C268,698 247,684 250,668 C252,659 255,655 262,652 Z" fill="#bcccd2" opacity=".75"/>
+      <path d="M268,666 h38 M274,679 h26" stroke="#8fa9b3" stroke-width="1.5" stroke-dasharray="7 5" fill="none" opacity=".6"/>
+      <path d="M952,398 C968,391 990,394 997,405 C1004,416 994,427 976,429 C958,431 944,422 946,411 C947,404 949,401 952,398 Z" fill="#bcccd2" opacity=".7"/>
+      <path d="M958,410 h26" stroke="#8fa9b3" stroke-width="1.5" stroke-dasharray="6 4" fill="none" opacity=".6"/>
+      <defs><pattern id="scrub" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.1" fill="#a8a06a" opacity=".55"/><circle cx="8" cy="7" r="1.1" fill="#a8a06a" opacity=".35"/></pattern></defs>
+      <path d="M845,432 C885,407 955,417 980,452 C1005,487 985,532 930,542 C875,552 820,527 815,487 C811,457 820,445 845,432 Z" fill="rgba(168,160,106,.16)"/>
+      <path d="M845,432 C885,407 955,417 980,452 C1005,487 985,532 930,542 C875,552 820,527 815,487 C811,457 820,445 845,432 Z" fill="url(#scrub)"/>
+      <g stroke="#26251f" opacity=".5" fill="none"><path d="M975,660 v-20 m-5,8 l5,-8 l5,8" stroke-width="1.5"/><path d="M905,668 h70 M905,663 v10 M940,665 v6 M975,663 v10" stroke-width="1"/></g>
+      <text x="905" y="690" font-size="9" text-anchor="middle" fill="#26251f" opacity=".5">0</text>
+      <text x="975" y="690" font-size="9" text-anchor="middle" fill="#26251f" opacity=".5">250 m</text>
+      <path d="M110,586 L126,614 L94,614 Z" fill="#f5f4ee" stroke="#6d4fa1" stroke-width="2.5" stroke-linejoin="round"/>
+      <text x="110" y="634" font-size="10" text-anchor="middle" fill="rgba(38,37,31,.5)">起点 · 输入行为</text>
+      <path class="solid" d="M110,600 L250,480 L430,330 L620,300" stroke="#6d4fa1" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round" opacity=".9"/>
+      <path d="M620,300 L800,560" stroke="#6d4fa1" stroke-width="2.5" stroke-dasharray="6 7" fill="none" stroke-linecap="round" opacity=".65"/>
+      <circle cx="264" cy="467" r="8" fill="#6d4fa1"/><path d="M260.5,467 l2.5,3 l5,-6" stroke="#fff" stroke-width="1.8" fill="none"/>
+      <circle cx="444" cy="317" r="8" fill="#6d4fa1"/><path d="M440.5,317 l2.5,3 l5,-6" stroke="#fff" stroke-width="1.8" fill="none"/>
+      <circle cx="250" cy="480" r="16" fill="#f5f4ee" stroke="#6d4fa1" stroke-width="2.5"/>
+      <circle cx="430" cy="330" r="16" fill="#f5f4ee" stroke="#6d4fa1" stroke-width="2.5"/>
+      <circle cx="620" cy="300" r="24" fill="none" stroke="#6d4fa1" stroke-width="2" opacity=".35"/>
+      <circle cx="620" cy="300" r="17" fill="#6d4fa1"/>
+      <circle cx="800" cy="560" r="16" fill="#f5f4ee" stroke="#6d4fa1" stroke-width="2" stroke-dasharray="4 4"/>
+      <text x="250" y="485" font-size="14" font-weight="900" text-anchor="middle" fill="#6d4fa1">1</text>
+      <text x="430" y="335" font-size="14" font-weight="900" text-anchor="middle" fill="#6d4fa1">2</text>
+      <text x="620" y="305" font-size="14" font-weight="900" text-anchor="middle" fill="#fff">3</text>
+      <text x="800" y="565" font-size="14" font-weight="900" text-anchor="middle" fill="#6d4fa1">4</text>
+      <text x="620" y="342" font-size="10" font-weight="700" text-anchor="middle" fill="#6d4fa1">当前检查点</text>
+    </svg>
+    <div class="card">
+      <div class="chead"><span class="dot cur">3</span><div class="ctitle"><b>处罚与责任</b><span>检查点 3 / 4 · 当前检查点</span></div></div>
+      <div class="row"><i>处罚措施</i><b>责令限期支付</b></div>
+      <div class="row"><i>逾期赔偿</i><b>按应付金额 50%–100%<small>加付赔偿金</small></b></div>
+      <div class="row"><i>法律依据</i><b>《劳动合同法》第八十五条</b></div>
+      <div class="row"><i>救济途径</i><b>劳动者可申请劳动仲裁</b></div>
+      <button class="go">GO · 前往检查点 4 · 风险提示</button>
+    </div>
+  </section>
+</main>
+<footer>演示数据，仅供参考，不构成法律意见 · statuteMind 决策原型 · 定向推理图 Course View</footer>
+</body>
+</html>

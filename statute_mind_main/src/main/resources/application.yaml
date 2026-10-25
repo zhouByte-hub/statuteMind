@@ -1,0 +1,12 @@
+server:
+  port: 9527
+  servlet:
+    context-path: /statute_mind
+spring:
+  application:
+    name: statute_mind_main
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      
+

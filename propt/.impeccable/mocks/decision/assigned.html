@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>statuteMind · 行为判断 · 裁判文书排版</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1440px;height:900px;overflow:hidden;background:#faf8f3;color:#1c1b18;font-family:'Noto Serif SC','FangSong','STFangsong',serif}
+.sans{font-family:'Noto Sans SC',sans-serif}
+/* 顶栏 · 文书头 */
+header{height:64px;display:flex;align-items:center;gap:34px;padding:0 40px;border-bottom:1px solid #b7352c}
+.wordmark{font-size:21px;font-weight:900;letter-spacing:.5px}
+.wordmark i{font-style:normal;color:#b7352c}
+.wordmark small{font-size:12px;font-weight:400;color:#8d8677;letter-spacing:3px;margin-left:12px}
+nav{display:flex;gap:32px}
+nav a{font-size:14px;color:#1c1b18;text-decoration:none;letter-spacing:3px;padding:22px 2px 19px;border-bottom:2px solid transparent}
+nav a.on{color:#b7352c;border-bottom-color:#b7352c;font-weight:700}
+.badge{margin-left:auto;font-size:12px;letter-spacing:1px;color:#b7352c;border:1px solid #b7352c;padding:5px 12px;background:rgba(183,53,44,.06)}
+/* 双栏 · 界栏 */
+main{display:flex;height:796px}
+aside{width:440px;padding:30px 36px;border-right:1px solid #b7352c;display:flex;flex-direction:column;gap:18px}
+.tag{font-size:11px;letter-spacing:6px;color:#8d8677}
+.searchbox{border:1px solid #1c1b18;background:#fffdf8;padding:18px 18px 14px;display:flex;flex-direction:column;gap:16px}
+.query{font-size:19px;line-height:1.75;min-height:96px}
+.cursor{display:inline-block;width:2px;height:20px;background:#b7352c;vertical-align:-3px;margin-left:2px;animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.qrow{display:flex;justify-content:space-between;align-items:center}
+.hint{font-size:11px;color:#8d8677;letter-spacing:1px}
+.go{background:#b7352c;color:#faf8f3;border:none;font-size:13px;letter-spacing:4px;padding:9px 20px;font-family:'Noto Sans SC',sans-serif}
+.modes{display:flex}
+.modes span{flex:1;text-align:center;font-size:14px;letter-spacing:5px;padding:12px 0;border:1px solid #b7352c;color:#b7352c}
+.modes span+span{border-left:none}
+.modes .act{background:#b7352c;color:#faf8f3;font-weight:700}
+.examples{border-top:1px solid #d8d1c2;padding-top:14px;display:flex;flex-direction:column;gap:10px;font-size:14px}
+.examples .ex::before{content:"「";color:#b7352c}
+.examples .ex::after{content:"」";color:#b7352c}
+.note{margin-top:auto;border:1px solid #b7352c;padding:13px 16px;font-size:12px;line-height:1.9;color:#8d8677}
+.note b{color:#b7352c}
+.doc{flex:1;padding:20px 44px}
+.sheet{height:100%;border:1px solid #b7352c;background:#fffdf9;padding:22px 44px 18px;display:flex;flex-direction:column;position:relative}
+.meta{display:flex;justify-content:space-between;font-size:11px;color:#8d8677;letter-spacing:2px}
+.pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:#b7352c;margin-left:8px;animation:blink 1.4s infinite}
+.caseno{font-size:38px;font-weight:900;letter-spacing:2px;margin-top:6px}
+.caseno b{color:#b7352c}
+/* 推理链 */
+.chain{display:flex;align-items:center;font-size:12px;color:#8d8677;letter-spacing:1px;margin:12px 0 4px}
+.chain .st{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.chain b{width:25px;height:25px;border:1px solid #b7352c;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:#b7352c;font-weight:600;font-family:'Noto Serif SC','FangSong',serif}
+.chain .cur{color:#1c1b18;font-weight:700}
+.chain .cur b{background:#b7352c;color:#faf8f3}
+.chain i{flex:1;height:1px;background:#b7352c;opacity:.55;margin:0 12px}
+/* 文书体 */
+h2{font-size:15px;letter-spacing:2px;margin:13px 0 6px;display:flex;align-items:baseline;gap:12px}
+h2 em{font-style:normal;font-size:10.5px;color:#8d8677;letter-spacing:2px;font-weight:400}
+h2 em.now{color:#b7352c}
+.body{font-size:15.5px;line-height:1.85;text-indent:2em}
+.verdict b{color:#b7352c}
+.law{border-left:1px solid #b7352c;padding:2px 0 2px 16px;margin-top:9px}
+.law h3{font-size:13px;color:#b7352c;letter-spacing:1px;font-weight:700;margin-bottom:3px}
+.law .q{font-size:15.5px;line-height:1.8}
+.concl{font-size:17px;font-weight:700;text-indent:2em}
+.concl b{color:#b7352c}
+.two{display:flex;margin-top:2px}
+.two>div{flex:1;min-width:0}
+.two>div+div{border-left:1px solid #b7352c;padding-left:26px;margin-left:26px}
+ul{list-style:none;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.7;margin-top:2px}
+li::before{content:"·";color:#b7352c;font-weight:900;margin-right:7px}
+.sign{margin-top:auto;align-self:flex-end;font-size:12.5px;color:#8d8677;letter-spacing:1px;padding-right:186px}
+/* 印章 */
+.seal{position:absolute;right:40px;bottom:30px;width:166px;height:166px;transform:rotate(-11deg);mix-blend-mode:multiply;pointer-events:none}
+.seal svg{display:block;width:100%;height:100%}
+.seal i{position:absolute;inset:0;mix-blend-mode:screen;background:radial-gradient(circle at 30% 36%,#faf8f3 0 8%,rgba(250,248,243,0) 13%),radial-gradient(circle at 70% 24%,rgba(250,248,243,.9) 0 5%,rgba(250,248,243,0) 10%),radial-gradient(circle at 58% 74%,#faf8f3 0 7%,rgba(250,248,243,0) 12%),radial-gradient(circle at 22% 66%,rgba(250,248,243,.75) 0 5%,rgba(250,248,243,0) 9%)}
+footer{height:40px;display:flex;align-items:center;justify-content:center;border-top:1px solid #b7352c;font-size:12px;color:#8d8677;letter-spacing:4px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wordmark"><i>statute</i>Mind<small class="sans">· 法规智能引擎</small></div>
+  <nav class="sans"><a href="#">法条检索</a><a href="#" class="on">行为判断</a><a href="#">知识库</a></nav>
+  <div class="badge sans">演示数据 · 内置 1,286 条法条</div>
+</header>
+<main>
+  <aside>
+    <p class="tag sans">检 索 台</p>
+    <div class="searchbox">
+      <p class="query">公司拖欠工资 3 个月怎么办<span class="cursor"></span></p>
+      <div class="qrow sans"><span class="hint">Enter 呈递问询 · 亦可直接描述行为</span><button class="go" type="button">呈递判断</button></div>
+    </div>
+    <div class="modes sans"><span>搜法条</span><span class="act">判行为</span></div>
+    <div class="examples">
+      <p class="tag sans">示例问询</p>
+      <p class="ex">竞业限制协议未约定补偿，是否有效</p>
+      <p class="ex">试用期最后一日被辞退，是否合法</p>
+      <p class="ex">租房押金到期不退，如何主张</p>
+    </div>
+    <div class="note sans"><b>问询即文书</b> —— 描述一个行为，引擎即按裁判文书体例逐步排印：行为定性、法条匹配、处罚与责任、风险提示，末尾钤印为凭。</div>
+  </aside>
+  <section class="doc">
+    <div class="sheet">
+      <div class="meta sans"><span>行为判断 · 判断文书 · 逐步排印中<span class="pulse"></span></span><span>排印于 2026 年 10 月 11 日 · 共 1 页</span></div>
+      <h1 class="caseno">（2026）SM判字<b>第0047号</b></h1>
+      <div class="chain sans">
+        <span class="st"><b>一</b>行为定性</span><i></i>
+        <span class="st"><b>二</b>法条匹配</span><i></i>
+        <span class="st"><b>三</b>处罚与责任</span><i></i>
+        <span class="st cur"><b>四</b>风险提示</span>
+      </div>
+      <h2>一、行为事实<em>步骤① 行为定性 · 已完成</em></h2>
+      <p class="body">本院认为：劳动者已依约提供劳动，用人单位自 2026 年 7 月起未支付工资，持续三个月且无正当事由。</p>
+      <p class="body verdict">行为定性为<b>「拖欠劳动报酬（无故拖欠）」</b>。</p>
+      <h2>二、理由与法条<em>步骤② 法条匹配 · 已完成</em></h2>
+      <div class="law">
+        <h3 class="sans">《中华人民共和国劳动合同法》第三十条</h3>
+        <p class="q">「用人单位应当按照劳动合同约定和国家规定，向劳动者及时足额支付劳动报酬。」</p>
+      </div>
+      <div class="law">
+        <h3 class="sans">《中华人民共和国劳动合同法》第八十五条（节引）</h3>
+        <p class="q">「由劳动行政部门责令限期支付劳动报酬……逾期不支付的，责令按应付金额百分之五十以上百分之一百以下的标准向劳动者加付赔偿金。」</p>
+      </div>
+      <h2>三、结论<em>结论已排印</em></h2>
+      <p class="concl">该行为<b>违反</b>《中华人民共和国劳动合同法》第三十条。</p>
+      <div class="two">
+        <div>
+          <h2>处罚与责任<em>步骤③ · 已完成</em></h2>
+          <ul>
+            <li>责令限期支付拖欠的劳动报酬</li>
+            <li>逾期不支付的，按应付金额 50%–100% 加付赔偿金</li>
+            <li>劳动者可申请劳动仲裁主张权利</li>
+          </ul>
+        </div>
+        <div>
+          <h2>风险提示<em class="now">步骤④ · 当前排印</em></h2>
+          <ul>
+            <li>仲裁时效为一年，自应付之日起算</li>
+            <li>保留工资条与考勤记录</li>
+            <li>可拨打 12333 投诉</li>
+          </ul>
+        </div>
+      </div>
+      <p class="sign sans">statuteMind · 法规智能引擎（演示）&nbsp;&nbsp;二〇二六年十月十一日</p>
+      <div class="seal"><i></i><svg viewBox="0 0 170 170" aria-hidden="true">
+        <circle cx="85" cy="85" r="80" fill="none" stroke="#b7352c" stroke-width="3.5"/>
+        <circle cx="85" cy="85" r="72" fill="none" stroke="#b7352c" stroke-width="1"/>
+        <path id="ring" d="M85 85m-62 0a62 62 0 1 1 124 0a62 62 0 1 1 -124 0" fill="none"/>
+        <text font-size="10.5" fill="#b7352c" letter-spacing="1" textLength="389"><textPath href="#ring">statuteMind · 法规智能引擎 · 仅供参考 · statuteMind · 法规智能引擎 · 仅供参考</textPath></text>
+        <text x="85" y="72" text-anchor="middle" font-size="14" fill="#b7352c">★</text>
+        <text x="85" y="96" text-anchor="middle" font-size="20" font-weight="700" fill="#b7352c" letter-spacing="2">仅供参考</text>
+        <text x="85" y="116" text-anchor="middle" font-size="9.5" fill="#b7352c" letter-spacing="3">演示数据</text>
+      </svg></div>
+    </div>
+  </section>
+</main>
+<footer>演示数据，仅供参考，不构成法律意见</footer>
+</body>
+</html>

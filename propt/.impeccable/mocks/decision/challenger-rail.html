@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>statuteMind · 行为判断 · 中央字键排印</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bone:#f2eee6;--ink:#1a1917;--verm:#c03a2b}
+html,body{width:1440px;height:900px;overflow:hidden}
+body{position:relative;background:var(--bone);color:var(--ink);font-family:'Noto Serif SC',serif}
+a{text-decoration:none;color:inherit}
+.m{font-family:'JetBrains Mono','Noto Serif SC',monospace;font-size:11px;font-weight:500;letter-spacing:.18em;text-transform:uppercase}
+.k{display:inline-flex;width:18px;height:18px;align-items:center;justify-content:center;border:1px solid var(--verm);color:var(--verm);font:600 11px/1 'Noto Serif SC',serif;font-style:normal;letter-spacing:0;margin-right:9px;vertical-align:-4px}
+.k.s{background:var(--verm);color:var(--bone)}
+.reg{position:absolute;font:400 13px/1 'JetBrains Mono',monospace;color:var(--verm)}
+/* ── 顶部细导航带 ── */
+header{position:absolute;top:0;left:0;right:0;height:52px;border-bottom:1px solid var(--ink);display:flex;align-items:center;gap:44px;padding:0 56px}
+.brand{font-size:17px;font-weight:700;letter-spacing:.06em}
+.brand i{font-style:normal;color:var(--verm)}
+nav{display:flex;gap:30px;font-size:14px;letter-spacing:.1em}
+nav .on{color:var(--verm);border-bottom:1px solid var(--verm);padding-bottom:3px}
+.badge{margin-left:auto;border:1px solid var(--ink);padding:7px 13px}
+/* ── 主区三栏 ── */
+main{position:absolute;top:52px;bottom:40px;left:0;right:0;display:grid;grid-template-columns:460px 88px 500px 1fr}
+/* 左栏 · 检索证据 */
+.ev{position:relative;padding:30px 30px 0 56px}
+.find{border:1px solid var(--ink);height:46px;display:flex;align-items:center;padding:0 6px 0 14px;margin-top:16px}
+.find .q{flex:1;font-size:15px}
+.caret{width:1px;height:18px;background:var(--verm);margin-right:12px;animation:bl 1.1s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+.go{width:34px;height:34px;background:var(--verm);color:var(--bone);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+.mode{display:flex;gap:24px;margin:16px 0 0 2px}
+.mode span::before{content:"";display:inline-block;width:7px;height:7px;border:1px solid var(--ink);margin-right:8px}
+.mode .on{color:var(--verm)}
+.mode .on::before{background:var(--verm);border-color:var(--verm)}
+.cite{border-top:1px solid var(--ink);margin-top:26px;padding-top:12px}
+.cite h3{font-size:16px;font-weight:700;margin-top:10px;letter-spacing:.02em}
+.qt{font-size:13px;line-height:2.05;margin-top:6px;text-align:justify}
+.stat{position:absolute;left:56px;bottom:18px;color:var(--verm)}
+/* 中央字键轨 */
+.rail{position:relative}
+.axis{position:absolute;left:50%;top:12px;bottom:12px;width:1px;background:var(--ink)}
+.key{position:absolute;left:50%;transform:translateX(-50%);width:26px;height:26px;background:var(--bone);border:1px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+.key.s{background:var(--verm);border-color:var(--verm);color:var(--bone);box-shadow:2px 2px 0 var(--ink)}
+.key.u{border-color:var(--verm);color:var(--verm)}
+.key.x{text-decoration:line-through}
+.k1{top:186px}.k2{top:372px}.k3{top:646px}
+.tk{position:absolute;left:50%;width:5px;height:5px;background:var(--verm);transform:translateX(-50%) rotate(45deg)}
+.t1{top:90px}.t2{top:288px}.t3{top:452px}.t4{top:724px}
+/* 右栏 · 判断结论 */
+.jd{position:relative;padding:30px 0 0 34px}
+.blk{margin-top:24px}
+.blk+.blk{border-top:1px solid var(--ink);padding-top:16px}
+h2{font-size:31px;font-weight:900;letter-spacing:.05em;margin-top:12px}
+.uo{position:relative;color:var(--verm)}
+.tx{font-size:15px;line-height:2;margin-top:10px}
+ul{list-style:none;margin-top:8px}
+li{position:relative;font-size:14px;line-height:2.05;padding-left:18px;text-align:justify}
+li::before{content:"";position:absolute;left:2px;top:12px;width:5px;height:5px;background:var(--verm)}
+.leg{position:absolute;left:34px;bottom:18px}
+/* 页边旁注 */
+.mg{position:relative;padding:92px 96px 0 26px}
+.note{position:relative;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:10px 0 12px 14px;font-size:12px;line-height:1.95;text-align:justify}
+.note::before{content:"";position:absolute;left:0;top:0;bottom:0;width:1px;background:var(--ink)}
+.note::after{content:"";position:absolute;right:100%;top:45%;width:106px;height:1px;background:var(--ink)}
+.note .m{display:block;margin-bottom:8px;color:var(--verm)}
+.vert{position:absolute;right:20px;top:340px;writing-mode:vertical-rl;letter-spacing:.34em;font-size:10px}
+footer{position:absolute;bottom:0;left:0;right:0;height:40px;border-top:1px solid var(--ink);display:flex;align-items:center;justify-content:space-between;padding:0 56px}
+.r1{top:66px;left:22px}.r2{top:66px;right:22px}.r3{bottom:12px;left:504px;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">statuteMind<i> · </i>法规智能引擎</div>
+  <nav><a href="#">法条检索</a><a href="#" class="on">行为判断</a><a href="#">知识库</a></nav>
+  <div class="badge m">演示数据 · 内置 1,286 条法条</div>
+</header>
+<main>
+  <span class="reg r1">+</span><span class="reg r2">+</span><span class="reg r3">+</span>
+  <aside class="ev">
+    <p class="m">01 · 检索证据 · EVIDENTIA</p>
+    <div class="find"><span class="q">公司拖欠工资 3 个月怎么办</span><i class="caret"></i><b class="go">判</b></div>
+    <div class="mode m"><span>搜法条</span><span class="on">判行为</span></div>
+    <article class="cite">
+      <p class="m"><i class="k s">甲</i>键位 甲 · 引文</p>
+      <h3>《劳动合同法》第三十条</h3>
+      <p class="qt">「用人单位应当按照劳动合同约定和国家规定，向劳动者及时足额支付劳动报酬。」</p>
+    </article>
+    <article class="cite">
+      <p class="m"><i class="k">乙</i>键位 乙 · 引文 · 节引</p>
+      <h3>《劳动合同法》第八十五条</h3>
+      <p class="qt">「由劳动行政部门责令限期支付……逾期不支付的，责令按应付金额百分之五十以上百分之一百以下的标准向劳动者加付赔偿金。」</p>
+    </article>
+    <p class="m stat">命中 2 条 · 检索 0.4s</p>
+  </aside>
+  <div class="rail">
+    <div class="axis"></div>
+    <span class="tk t1"></span><span class="tk t2"></span><span class="tk t3"></span><span class="tk t4"></span>
+    <span class="key s k1">甲</span>
+    <span class="key u k2">乙</span>
+    <span class="key x k3">丙</span>
+  </div>
+  <section class="jd">
+    <p class="m">02 · 判断结论 · SENTENTIA</p>
+    <div class="blk">
+      <p class="m"><i class="k s">甲</i>行为定性</p>
+      <h2>拖欠劳动报酬<span class="uo">（无故拖欠）</span></h2>
+    </div>
+    <div class="blk">
+      <p class="m"><i class="k s">甲</i>结论</p>
+      <p class="tx">违反《中华人民共和国劳动合同法》第三十条。</p>
+    </div>
+    <div class="blk">
+      <p class="m"><i class="k">乙</i>处罚与责任</p>
+      <ul>
+        <li>责令限期支付；</li>
+        <li>逾期按应付金额 50%–100% 加付赔偿金；</li>
+        <li>劳动者可申请劳动仲裁。</li>
+      </ul>
+    </div>
+    <div class="blk">
+      <p class="m">风险提示</p>
+      <ul>
+        <li>仲裁时效一年；</li>
+        <li>保留工资条与考勤记录；</li>
+        <li>可拨打 12333 投诉。</li>
+      </ul>
+    </div>
+    <p class="m leg">键例 —— 实心 当前 · 细线 已引 · 删除线 未采</p>
+  </section>
+  <aside class="mg">
+    <div class="note">
+      <span class="m">旁注 · MARGO</span>
+      「无故拖欠」定义参见《工资支付暂行规定》第十八条。
+    </div>
+    <p class="m vert">校勘本 · 中央字键轨 · 每一论断沿轨归原</p>
+  </aside>
+</main>
+<footer>
+  <p class="m">免责 · 演示数据，仅供参考，不构成法律意见</p>
+  <p class="m">statuteMind · challenger rail · MMXXVI</p>
+</footer>
+</body>
+</html>
