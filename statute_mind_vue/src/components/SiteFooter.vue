@@ -9,7 +9,7 @@ const current = computed(() => VIEW_NAMES[route.name] || '法条检索')
 
 <template>
   <footer>
-    <p><b>演示数据，仅供参考，不构成法律意见</b> · statuteMind 原型 · 当前：{{ current }}模式</p>
+    <p>演示数据，仅供参考，不构成法律意见</p>
   </footer>
 </template>
 

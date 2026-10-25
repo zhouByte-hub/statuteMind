@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import BrandMark from '@/components/BrandMark.vue'
 import { store } from '@/store/app'
@@ -11,9 +11,6 @@ const NAVS = [
   { name: 'library', label: '知识库' }
 ]
 
-/** SERP 形态（检索结果态）下顶栏出现小品牌 */
-const showBrand = computed(() => route.name === 'search' && !!route.query.q)
-
 /** 上传入库后徽标跳动一次 */
 const ticked = ref(false)
 watch(() => store.statuteCount, () => {
@@ -24,24 +21,19 @@ watch(() => store.statuteCount, () => {
 
 <template>
   <header class="top">
-    <RouterLink class="brand" :class="{ show: showBrand }" :to="{ name: 'search' }" aria-label="statuteMind 首页">
+    <RouterLink class="brand" :to="{ name: 'search' }" aria-label="statuteMind 首页">
       <BrandMark :size="24" />
-      statute<em>Mind</em>
+      Statute<em>Mind</em>
     </RouterLink>
     <nav aria-label="模式导航">
       <RouterLink v-for="n in NAVS" :key="n.name" :to="{ name: n.name }" :class="{ on: route.name === n.name }">{{ n.label }}</RouterLink>
     </nav>
-    <span class="badge" :class="{ tick: ticked }">
-      <span class="dot" aria-hidden="true"></span>
-      演示数据 · 内置 <b class="num-tab">{{ store.statuteCount.toLocaleString() }}</b> 条法条
-    </span>
   </header>
 </template>
 
 <style scoped>
 .top{flex:none;height:60px;display:flex;align-items:center;gap:28px;padding:0 28px;border-bottom:1px solid var(--line2)}
-.brand{display:none;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-weight:900;font-size:19px;white-space:nowrap}
-.brand.show{display:inline-flex}
+.brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-weight:900;font-size:19px;white-space:nowrap}
 .brand em{color:var(--blue);font-style:normal}
 nav{display:flex;gap:26px}
 nav a{font-size:14px;color:var(--ink2);text-decoration:none;padding:19px 2px 17px;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;white-space:nowrap}

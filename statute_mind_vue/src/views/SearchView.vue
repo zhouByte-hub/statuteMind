@@ -1,7 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import BrandMark from '@/components/BrandMark.vue'
 import ChipsRow from '@/components/ChipsRow.vue'
 import NoticeBox from '@/components/NoticeBox.vue'
 import ResultItem from '@/components/ResultItem.vue'
@@ -86,20 +85,8 @@ watch(() => store.replay, r => { if(r?.type === 'search') runSearch(r.id) })
 <template>
   <section class="vsearch" :class="{ compact: !!route.query.q }" aria-label="法条检索">
     <div class="heroWrap">
-      <div class="brandBig">
-        <BrandMark :size="72" hero />
-        <h1>statute<em>Mind</em></h1>
-        <p class="tagline">把生活语言翻译成法律语言 · 条文出处可查</p>
-      </div>
-      <div class="modeTabs" aria-label="检索模式">
-        <button class="on" aria-current="true">搜法条</button>
-        <button @click="router.push({ name: 'judge' })">判行为</button>
-      </div>
+      <h1 class="tagline">把生活语言翻译成法律语言 · 条文出处可查</h1>
       <div class="sboxRow">
-        <RouterLink class="serpLogo" :to="{ name: 'search' }" aria-label="返回 statuteMind 首页">
-          <BrandMark :size="20" />
-          <span>statute<em>Mind</em></span>
-        </RouterLink>
         <div class="sbox">
           <input
             ref="inputEl" v-model="input" type="text"
@@ -149,24 +136,13 @@ watch(() => store.replay, r => { if(r?.type === 'search') runSearch(r.id) })
 .vsearch{display:block;animation:fadein .25s both}
 .heroWrap{max-width:880px;margin:0 auto;padding:clamp(48px,10vh,110px) 20px 26px;text-align:center}
 .heroWrap>*{animation:rise .55s var(--ease) both}
-.brandBig{animation-delay:.02s}
-.modeTabs{animation-delay:.08s}
-.sboxRow{animation-delay:.14s}
-.heroWrap .chips{animation-delay:.2s}
-.recent{animation-delay:.26s}
-.brandBig svg{width:72px;height:72px}
-.brandBig h1{font-size:50px;font-weight:900;letter-spacing:.01em;margin-top:14px;color:var(--ink)}
-.brandBig h1 em{font-style:normal;color:var(--blue)}
-.tagline{margin-top:12px;font-size:14.5px;color:var(--muted);letter-spacing:.05em}
-.modeTabs{display:inline-flex;gap:30px;margin:36px auto 16px}
-.modeTabs button{font-size:15px;color:var(--muted);padding:4px 2px;border-bottom:2px solid transparent;transition:color .2s}
-.modeTabs button:hover{color:var(--ink)}
-.modeTabs button.on{color:var(--blue);font-weight:700;border-color:var(--blue)}
+.tagline{animation-delay:.02s;margin-top:0;font-weight:500;font-size:14.5px;color:var(--muted);letter-spacing:.05em}
+.sboxRow{animation-delay:.08s}
+.heroWrap .chips{animation-delay:.14s}
+.recent{animation-delay:.2s}
 
 /* 搜索框行：首页居中大框；检索后吸顶窄框（百度 SERP 形态） */
-.sboxRow{display:flex;justify-content:center;align-items:center;gap:16px}
-.serpLogo{display:none;align-items:center;gap:7px;text-decoration:none;color:var(--ink);font-weight:900;font-size:17px;white-space:nowrap}
-.serpLogo em{color:var(--blue);font-style:normal}
+.sboxRow{display:flex;justify-content:center;align-items:center;gap:16px;margin-top:30px}
 .sbox{display:flex;width:min(620px,100%)}
 .sbox input{flex:1;min-width:0;height:48px;border:2px solid var(--blue);border-right:0;border-radius:10px 0 0 10px;padding:0 16px;font:400 15px 'Noto Sans SC',sans-serif;color:var(--ink);background:#fff;transition:box-shadow .2s}
 .sbox input::placeholder{color:var(--faint)}
@@ -177,10 +153,9 @@ watch(() => store.replay, r => { if(r?.type === 'search') runSearch(r.id) })
 
 /* 检索后：收起主视觉，搜索框吸顶 */
 .compact .heroWrap{padding:0 0 6px}
-.compact .brandBig,.compact .modeTabs,.compact .recent{display:none}
+.compact .tagline,.compact .recent{display:none}
 .compact .heroWrap .chips{display:none}
 .compact .sboxRow{position:sticky;top:0;z-index:20;background:#fff;padding:12px 20px;border-bottom:1px solid var(--line)}
-.compact .serpLogo{display:inline-flex}
 .compact .sbox input,.compact .sbox .go{height:42px}
 
 /* 检索中加载条（有限进度，非无限循环） */
@@ -203,13 +178,10 @@ watch(() => store.replay, r => { if(r?.type === 'search') runSearch(r.id) })
 
 @media (max-width:760px){
   .heroWrap{padding-top:7vh}
-  .brandBig svg{width:54px;height:54px}
-  .brandBig h1{font-size:38px}
   .tagline{font-size:13px}
   .sbox input{height:44px;font-size:14px;padding:0 12px}
   .sbox .go{width:88px;height:44px;font-size:14px}
   .compact .sbox input,.compact .sbox .go{height:40px}
-  .serpLogo span{display:none}
   .serp{padding:14px 16px 60px}
 }
 </style>
