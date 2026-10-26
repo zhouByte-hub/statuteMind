@@ -18,8 +18,10 @@ export function useNav(){
     if(route.name === 'library' && route.query.lib === libId) store.requestReplay('library', libId)
     else router.push({ name: 'library', query: { lib: libId } })
   }
+  /** 打开工作流编排画布 */
+  const openWorkflow = () => router.push({ name: 'workflow' })
   /** 回到检索首页态（清除 q） */
   const goHome = () => router.push({ name: 'search' })
 
-  return { openSearch, openJudgment, openLibrary, goHome }
+  return { openSearch, openJudgment, openLibrary, openWorkflow, goHome }
 }

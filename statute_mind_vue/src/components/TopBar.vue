@@ -8,7 +8,8 @@ const route = useRoute()
 const NAVS = [
   { name: 'search', label: '法条检索' },
   { name: 'judge', label: '行为判断' },
-  { name: 'library', label: '知识库' }
+  { name: 'library', label: '知识库' },
+  { name: 'workflow', label: '工作流' }
 ]
 
 /** 上传入库后徽标跳动一次 */

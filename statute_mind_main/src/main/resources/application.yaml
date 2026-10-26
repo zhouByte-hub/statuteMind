@@ -8,5 +8,8 @@ spring:
   ai:
     ollama:
       base-url: http://localhost:11434
-
+      chat:
+        model: qwen2.5:3b-instruct
+      embedding:
+        model: nomic-embed-text
 
