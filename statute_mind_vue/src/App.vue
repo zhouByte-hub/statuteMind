@@ -1,12 +1,14 @@
 <script setup>
 import TopBar from '@/components/TopBar.vue'
 import SiteFooter from '@/components/SiteFooter.vue'
+import AiLawyer from '@/components/AiLawyer.vue'
 </script>
 
 <template>
   <TopBar />
   <main><RouterView /></main>
   <SiteFooter />
+  <AiLawyer />
 </template>
 
 <style scoped>

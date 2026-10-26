@@ -8,7 +8,8 @@ const router = createRouter({
     { path: '/search', name: 'search', component: () => import('@/views/SearchView.vue') },
     { path: '/judge', name: 'judge', component: () => import('@/views/JudgeView.vue') },
     { path: '/library', name: 'library', component: () => import('@/views/LibraryView.vue') },
-    { path: '/workflow', name: 'workflow', component: () => import('@/views/WorkflowView.vue') },
+    { path: '/workflow', name: 'workflow', component: () => import('@/views/WorkflowHome.vue') },
+    { path: '/workflow/:id', name: 'workflow-edit', component: () => import('@/views/WorkflowView.vue') },
     { path: '/:pathMatch(.*)*', redirect: { name: 'search' } }
   ],
   scrollBehavior: () => ({ top: 0 })

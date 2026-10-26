@@ -3,7 +3,8 @@
  * 工作流编排视图：类 Dify 画布（Vue Flow）。
  * 左节点库 / 中画布 / 右配置抽屉 / 底运行追踪；localStorage 自动保存，可一键回到内置示例。
  */
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { MarkerType, useVueFlow, VueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
@@ -18,28 +19,84 @@ import WfConfigDrawer from '@/components/workflow/WfConfigDrawer.vue'
 import WfRunPanel from '@/components/workflow/WfRunPanel.vue'
 import { NODE_TYPES, createNode } from '@/workflow/registry'
 import { runFlow } from '@/workflow/executor'
-import { loadFlow, resetToSample, saveFlow } from '@/workflow/storage'
+import { loadStore, saveFlow, addFlow, removeFlow, setActive } from '@/workflow/storage'
 
 const allTypes = Object.keys(NODE_TYPES)
 
-// ---------- 流程数据（首屏：本地保存 > 内置示例） ----------
-const initial = loadFlow() || resetToSample()
-const flowName = ref(initial.name)
-const nodes = ref(initial.nodes)
-const edges = ref(initial.edges.map(e => ({
+// ---------- 多流程管理（路由 /workflow/:id 定位流程；支持新建/切换/删除） ----------
+const route = useRoute()
+const router = useRouter()
+const store = loadStore()
+// 无效 id 深链 → 回工作流首页
+if(route.params.id && !store.flows.some(f => f.id === route.params.id)){
+  router.replace({ name: 'workflow' })
+}else if(route.params.id){
+  setActive(route.params.id)
+}
+const current = computed(() => store.flows.find(f => f.id === store.activeId) || store.flows[0])
+
+const flowName = ref(current.value.name)
+const nodes = ref(current.value.nodes)
+const edges = ref(current.value.edges.map(e => ({
   data: {}, markerEnd: MarkerType.ArrowClosed, type: 'wf', ...e
 })))
+
+/** 把当前流程内容刷入画布（切换/新建/删除当前流程后调用） */
+function applyCurrent(){
+  flowName.value = current.value.name
+  nodes.value = current.value.nodes
+  edges.value = current.value.edges.map(e => ({
+    data: {}, markerEnd: MarkerType.ArrowClosed, type: 'wf', ...e
+  }))
+  selectedId.value = null
+  selectedEdgeId.value = null
+  showRun.value = false
+  Object.keys(runInput).forEach(k => { delete runInput[k] })
+  nextTick(() => fitView({ padding: 0.18, maxZoom: 1.1 }))
+}
+
+const showFlows = ref(false)
+
+function switchFlow(id){
+  showFlows.value = false
+  if(id === store.activeId) return
+  abortCtl?.abort()
+  setActive(id)
+  router.replace({ name: 'workflow-edit', params: { id } })
+  applyCurrent()
+}
+
+function onAddFlow(){
+  abortCtl?.abort()
+  const f = addFlow()
+  router.replace({ name: 'workflow-edit', params: { id: f.id } })
+  applyCurrent()
+  showFlows.value = false
+}
+
+function onDeleteFlow(id){
+  const wasActive = id === store.activeId
+  if(wasActive) abortCtl?.abort()
+  removeFlow(id)
+  if(wasActive){
+    router.replace({ name: 'workflow-edit', params: { id: store.activeId } })
+    applyCurrent()
+  }
+}
+
+/** 返回工作流首页（卡片网格） */
+function backHome(){ router.push({ name: 'workflow' }) }
 
 const canvasWrap = ref(null)
 const { fitView, screenToFlowCoordinate } = useVueFlow()
 
-// ---------- 自动保存 ----------
+// ---------- 自动保存（写入当前流程） ----------
 const savedTick = ref(false)
 let saveTimer = 0
 watch([nodes, edges, flowName], () => {
   clearTimeout(saveTimer)
   saveTimer = setTimeout(() => {
-    saveFlow({ name: flowName.value, nodes: nodes.value, edges: edges.value })
+    saveFlow(current.value.id, { name: flowName.value, nodes: nodes.value, edges: edges.value })
     savedTick.value = true
     setTimeout(() => { savedTick.value = false }, 1400)
   }, 600)
@@ -48,6 +105,7 @@ watch([nodes, edges, flowName], () => {
 // ---------- 画布交互 ----------
 const selectedId = ref(null)
 const selected = computed(() => nodes.value.find(n => n.id === selectedId.value) || null)
+const selectedEdgeId = ref(null)
 
 /** 由入边反推上游节点的输出变量（配置抽屉里的「上游变量」chips） */
 const upstreamVars = computed(() => {
@@ -66,8 +124,44 @@ const upstreamVars = computed(() => {
   return res
 })
 
-function onNodeClick({ node }){ selectedId.value = node.id }
-function onPaneClick(){ selectedId.value = null }
+function onNodeClick({ node }){ selectedId.value = node.id; selectedEdgeId.value = null }
+function onEdgeClick({ edge }){ selectedEdgeId.value = edge.id; selectedId.value = null }
+function onPaneClick(){ selectedId.value = null; selectedEdgeId.value = null }
+
+/** 删除节点（连带相邻连线）；运行中禁止，防止打断执行器 */
+function removeNode(id){
+  if(running.value) return
+  nodes.value = nodes.value.filter(n => n.id !== id)
+  edges.value = edges.value.filter(e => e.source !== id && e.target !== id)
+  if(selectedId.value === id) selectedId.value = null
+}
+
+function removeEdge(id){
+  if(running.value) return
+  edges.value = edges.value.filter(e => e.id !== id)
+  if(selectedEdgeId.value === id) selectedEdgeId.value = null
+}
+
+/** Backspace / Delete 删除选中的节点或连线（输入框内按键不拦截） */
+function onCanvasKey(e){
+  const t = e.target
+  if(t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName || ''))) return
+  if(e.key !== 'Backspace' && e.key !== 'Delete') return
+  if(selectedId.value){ e.preventDefault(); removeNode(selectedId.value) }
+  else if(selectedEdgeId.value){ e.preventDefault(); removeEdge(selectedEdgeId.value) }
+}
+
+function closeFlowMenu(){ showFlows.value = false }
+
+onMounted(() => {
+  window.addEventListener('keydown', onCanvasKey)
+  document.addEventListener('click', closeFlowMenu)
+  nextTick(() => fitView({ padding: 0.18, maxZoom: 1.1 }))
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onCanvasKey)
+  document.removeEventListener('click', closeFlowMenu)
+})
 
 function onConnect(conn){
   if(!conn.source || !conn.target || conn.source === conn.target) return
@@ -106,15 +200,6 @@ function onAddFromPanel(type){
 function addNodeAt(type, position){
   const n = createNode(type, position)
   if(n) nodes.value.push(n)
-}
-
-function loadSample(){
-  const f = resetToSample()
-  flowName.value = f.name
-  nodes.value = f.nodes
-  edges.value = f.edges.map(e => ({ data: {}, markerEnd: MarkerType.ArrowClosed, type: 'wf', ...e }))
-  selectedId.value = null
-  nextTick(() => fitView({ padding: 0.18, maxZoom: 1.1 }))
 }
 
 function clearCanvas(){
@@ -184,10 +269,6 @@ async function doRun(){
 }
 
 function stopRun(){ abortCtl?.abort() }
-
-onMounted(() => {
-  nextTick(() => fitView({ padding: 0.18, maxZoom: 1.1 }))
-})
 </script>
 
 <template>
@@ -195,12 +276,15 @@ onMounted(() => {
     <!-- 顶部工具栏 -->
     <div class="toolbar">
       <div class="left">
-        <svg class="ticon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v6a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4V4M12 14v6M9 17l3 3 3-3"/></svg>
+        <button class="back" aria-label="返回工作流首页" title="返回首页" @click="backHome">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m6-7-7 7 7 7"/></svg>
+          <span>全部流程</span>
+        </button>
+        <i class="tsep" aria-hidden="true" />
         <input v-model="flowName" class="fname" aria-label="流程名称" placeholder="未命名流程">
         <transition name="fade"><span v-if="savedTick" class="saved">已自动保存</span></transition>
       </div>
       <div class="right">
-        <button class="mini" @click="loadSample">加载示例</button>
         <button class="mini" @click="clearCanvas">清空画布</button>
         <button class="mini pri run" @click="openRun">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5 19.5 12 7 19.5v-15Z"/></svg>
@@ -217,30 +301,29 @@ onMounted(() => {
           v-model:nodes="nodes"
           v-model:edges="edges"
           class="cflow"
-          delete-key-code="Delete"
           :min-zoom="0.15"
           :max-zoom="2.2"
           :connection-radius="32"
           @connect="onConnect"
           @node-click="onNodeClick"
+          @edge-click="onEdgeClick"
           @pane-click="onPaneClick"
         >
           <Background :gap="22" pattern-color="#D7DBE5" />
           <Controls position="bottom-left" />
 
           <template v-for="t in allTypes" :key="t" #[`node-${t}`]="p">
-            <WfNode v-bind="p" />
+            <WfNode v-bind="p" @remove="removeNode(p.id)" />
           </template>
           <template #edge-wf="p">
-            <WfEdge v-bind="p" />
+            <WfEdge v-bind="p" @remove="removeEdge(p.id)" />
           </template>
         </VueFlow>
 
         <!-- 空画布引导 -->
         <div v-if="!nodes.length" class="emptyGuide">
           <b>画布还是空的</b>
-          <p>从左侧节点库拖入节点开始编排，或一键加载内置示例「欠薪维权助手」</p>
-          <button class="mini pri" @click="loadSample">加载示例工作流</button>
+          <p>从左侧节点库拖入节点开始编排</p>
         </div>
 
         <!-- 移动端提示 -->
@@ -252,6 +335,7 @@ onMounted(() => {
         :node="selected"
         :upstream="upstreamVars"
         @close="selectedId = null"
+        @remove="removeNode(selectedId)"
       />
 
       <WfRunPanel
@@ -275,8 +359,33 @@ onMounted(() => {
 .fname:hover{background:var(--gray)}
 .fname:focus{outline:none;border-color:var(--blue);background:#fff}
 .saved{font-size:11.5px;color:#1E7B4F}
+.back{display:inline-flex;align-items:center;gap:6px;flex:none;border:0;background:none;padding:5px 8px;border-radius:8px;font:600 13px/1 inherit;color:var(--muted);cursor:pointer;transition:background .15s,color .15s}
+.back svg{width:14px;height:14px}
+.back:hover{background:var(--gray);color:var(--blue)}
+.tsep{flex:none;width:1px;height:20px;background:var(--line2);margin:0 2px}
 .right{display:flex;align-items:center;gap:9px;flex:none}
 .run svg{margin-right:2px}
+
+/* 流程切换下拉 */
+.flowSel{position:relative;flex:none}
+.fsBtn{display:inline-flex;align-items:center;gap:5px;max-width:180px;border:1px solid var(--line);border-radius:8px;padding:5.5px 9px;background:#fff;font:600 13px/1.3 inherit;color:var(--ink);cursor:pointer;transition:border-color .15s}
+.fsBtn:hover{border-color:var(--blue)}
+.fsBtn svg{flex:none;width:12px;height:12px;color:var(--faint)}
+.fsName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fsMenu{position:absolute;top:calc(100% + 6px);left:0;z-index:60;width:250px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 32px rgba(31,41,72,.14);padding:8px;animation:fadein .15s both}
+.fsHead{font-size:11px;color:var(--faint);padding:3px 8px 7px}
+.fsList{max-height:260px;overflow:auto;display:flex;flex-direction:column;gap:2px}
+.fsItem{display:flex;align-items:center;gap:8px;width:100%;border:0;border-radius:8px;padding:8px 9px;background:none;cursor:pointer;text-align:left;transition:background .12s}
+.fsItem:hover{background:var(--gray)}
+.fsItem.on{background:#F0F3FE}
+.fsItem b{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fsItem.on b{color:var(--blue)}
+.fsItem span{flex:none;font-size:11px;color:var(--faint)}
+.fsDel{flex:none;display:inline-flex;width:20px;height:20px;border-radius:6px;align-items:center;justify-content:center;color:var(--faint);cursor:pointer;transition:color .12s,background .12s}
+.fsDel svg{width:10px;height:10px}
+.fsDel:hover{color:var(--red);background:#FDEEED}
+.fsNew{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:6px;border:1px dashed var(--line);border-radius:8px;padding:8px;font:600 12.5px/1 inherit;color:var(--blue);background:none;cursor:pointer;transition:border-color .15s,background .15s}
+.fsNew:hover{border-color:var(--blue);background:#F5F8FF}
 
 /* 画布区 */
 .canvasWrap{flex:1;display:flex;min-height:0;position:relative;background:#F7F8FA}
@@ -287,6 +396,8 @@ onMounted(() => {
 .cflow :deep(.vue-flow__handle:hover){background:var(--blue)}
 .cflow :deep(.vue-flow__node){cursor:grab}
 .cflow :deep(.vue-flow__node.dragging){cursor:grabbing}
+.cflow :deep(.vue-flow__edge){cursor:pointer}
+.cflow :deep(.vue-flow__edge:hover .wf-edge){stroke:#6B7688}
 .cflow :deep(.vue-flow__edge.selected .wf-edge){stroke:var(--blue)}
 .cflow :deep(.vue-flow__controls){box-shadow:var(--shadow);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .cflow :deep(.vue-flow__controls-button){background:#fff;border-bottom:1px solid var(--line2);color:var(--ink2)}
@@ -306,7 +417,8 @@ onMounted(() => {
 
 @media (max-width:760px){
   .mobileTip{display:block}
-  .fname{width:130px;font-size:13px}
+  .fsBtn{max-width:110px}
+  .fname{width:110px;font-size:13px}
   .canvasWrap > aside:first-child{display:none}
   .toolbar{padding:0 10px;gap:8px}
 }

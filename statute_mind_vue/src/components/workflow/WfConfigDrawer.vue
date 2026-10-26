@@ -12,7 +12,7 @@ const props = defineProps({
   /** 上游变量：[{ nodeId, nodeLabel, varName, varLabel }] */
   upstream: { type: Array, default: () => [] }
 })
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'remove'])
 
 const meta = computed(() => NODE_TYPES[props.node.type] || {})
 const d = computed(() => props.node.data)
@@ -154,14 +154,20 @@ function addRef(){ d.value.refs.push('{{#') }
       </template>
     </div>
 
-    <footer v-if="upstream.length">
-      <h4>上游变量（点击复制引用）</h4>
-      <div class="vars">
-        <button v-for="u in upstream" :key="u.nodeId + u.varName" class="vchip" @click="copyRef(u)">
-          <b>{{ u.nodeLabel }}</b>{{ u.varName }}
-          <em v-if="copied === `{{#${u.nodeId}.${u.varName}#}}`">已复制</em>
-        </button>
+    <footer>
+      <div v-if="upstream.length">
+        <h4>上游变量（点击复制引用）</h4>
+        <div class="vars">
+          <button v-for="u in upstream" :key="u.nodeId + u.varName" class="vchip" @click="copyRef(u)">
+            <b>{{ u.nodeLabel }}</b>{{ u.varName }}
+            <em v-if="copied === `{{#${u.nodeId}.${u.varName}#}}`">已复制</em>
+          </button>
+        </div>
       </div>
+      <button class="danger" @click="emit('remove')">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14" /></svg>
+        删除该节点
+      </button>
     </footer>
   </aside>
 </template>
@@ -198,8 +204,10 @@ input[type=number]{max-width:120px}
 .add:hover{background:#F0F3FE}
 .note{margin-top:8px;font-size:11px;color:var(--faint);line-height:1.6}
 
-footer{flex:none;border-top:1px solid var(--line2);padding:10px 14px 12px;background:#FBFCFE}
+footer{flex:none;border-top:1px solid var(--line2);padding:10px 14px 12px;background:#FBFCFE;display:flex;flex-direction:column;gap:10px}
 .vars{display:flex;flex-wrap:wrap;gap:6px}
+.danger{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;font:600 12px/1 inherit;color:var(--red);border:1px solid #E5B6B2;border-radius:8px;padding:7px 12px;background:#fff;cursor:pointer;transition:background .15s,border-color .15s}
+.danger:hover{background:#FDF3F2;border-color:var(--red)}
 .vchip{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:3.5px 10px;background:#fff;transition:border-color .15s,color .15s}
 .vchip b{font-weight:600;color:var(--blue)}
 .vchip:hover{border-color:var(--blue)}

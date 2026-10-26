@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
-const VIEW_NAMES = { search: '法条检索', judge: '行为判断', library: '知识库', workflow: '工作流编排' }
+const VIEW_NAMES = { search: '法条检索', judge: '行为判断', library: '知识库', workflow: '工作流', 'workflow-edit': '工作流编排' }
 const current = computed(() => VIEW_NAMES[route.name] || '法条检索')
 </script>
 

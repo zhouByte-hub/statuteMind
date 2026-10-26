@@ -29,7 +29,7 @@ export const refOf = (nodeId, varName) => `{{#${nodeId}.${varName}#}}`
 export const NODE_TYPES = {
   start: {
     label: '开始', group: 'basic', color: '#3D5CE5', icon: NODE_ICONS.start,
-    desc: '定义工作流的输入参数', outputs: 0, hasTarget: false,
+    desc: '定义工作流的输入参数', outputs: 1, hasTarget: false,
     defaults: { fields: [{ name: 'query', label: '用户问题' }] },
     outVars: [{ name: 'query', label: '用户问题' }],
     summary: d => `${(d.fields || []).length} 个输入字段`

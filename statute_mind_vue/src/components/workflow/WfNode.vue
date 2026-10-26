@@ -13,6 +13,8 @@ const props = defineProps({
 
 const meta = computed(() => NODE_TYPES[props.type] || {})
 
+const emit = defineEmits(['remove'])
+
 const STATUS = {
   idle: null,
   running: { label: '运行中' },
@@ -32,6 +34,10 @@ const preview = computed(() => {
 <template>
   <div class="wfnode" :class="{ sel: selected, [data.status || '']: !!data.status }">
     <Handle v-if="meta.hasTarget" type="target" :position="Position.Left" />
+
+    <button class="del" aria-label="删除节点" title="删除节点" @click.stop="emit('remove')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+    </button>
 
     <header>
       <i class="ico" :style="{ color: meta.color, background: meta.color + '1A' }">
@@ -70,7 +76,8 @@ const preview = computed(() => {
       </div>
     </template>
 
-    <Handle v-else-if="meta.outputs !== 0" type="source" :position="Position.Right" />
+    <!-- 普通输出锚点（条件分支的输出在分支行内；开始节点也有输出） -->
+    <Handle v-if="type !== 'ifelse' && meta.outputs !== 0" type="source" :position="Position.Right" />
   </div>
 </template>
 
@@ -84,6 +91,15 @@ const preview = computed(() => {
 .wfnode.running{border-color:var(--blue)}
 .wfnode.failed{border-color:var(--red)}
 .wfnode.skipped{opacity:.55}
+
+.del{
+  position:absolute;top:-9px;right:-9px;z-index:2;width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);
+  color:var(--red);cursor:pointer;box-shadow:var(--shadow);opacity:0;transition:opacity .15s,border-color .15s;
+}
+.del svg{width:10px;height:10px}
+.wfnode:hover .del,.wfnode.sel .del{opacity:1}
+.del:hover{border-color:var(--red)}
 
 header{display:flex;align-items:center;gap:8px;min-width:0}
 .ico{flex:none;display:inline-flex;width:26px;height:26px;border-radius:7px;align-items:center;justify-content:center}
