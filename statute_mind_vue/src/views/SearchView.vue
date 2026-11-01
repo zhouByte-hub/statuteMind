@@ -8,6 +8,7 @@ import { store } from '@/store/app'
 import { useNav } from '@/composables/useNav'
 import { STATUTES, SEARCH_EXAMPLES, SEARCH_SUGGESTIONS } from '@/data/mock'
 import { prefersReduced } from '@/utils/env'
+import { beginTask } from '@/monitor/metrics'
 
 const route = useRoute()
 const router = useRouter()
@@ -25,11 +26,16 @@ const exampleItems = SEARCH_EXAMPLES.map(k => ({ value: k, label: k }))
 const suggestionItems = SEARCH_SUGGESTIONS.map(k => ({ value: k, label: k }))
 
 let timer = null
+let endPrev = null // 被新检索取代的任务，结束时标记 skipped
 
 /** 演示检索：关键词 × 内置法条关键词表做双向包含匹配并计分 */
 function runSearch(q){
   q = (q || '').trim()
   if(!q){ inputEl.value?.focus(); return }
+  clearTimeout(timer)
+  if(endPrev) endPrev('skipped', '被新检索取代')
+  const end = beginTask('search', `「${q}」`)
+  endPrev = end
   input.value = q
   store.addRecent(q)
   searching.value = true
@@ -51,6 +57,8 @@ function runSearch(q){
     searching.value = false
     if(hits.length) results.value = hits
     else emptyQ.value = q
+    end(hits.length ? 'success' : 'failed', hits.length ? `${hits.length} 条命中` : '未命中')
+    endPrev = null
   }, prefersReduced ? 0 : 700)
 }
 

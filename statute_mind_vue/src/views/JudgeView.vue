@@ -10,6 +10,7 @@ import { useNav } from '@/composables/useNav'
 import { JUDGMENTS, PRESET_KEYS, JUDGE_EXAMPLES } from '@/data/mock'
 import { buildNodes } from '@/utils/graph'
 import { prefersReduced } from '@/utils/env'
+import { beginTask } from '@/monitor/metrics'
 
 const route = useRoute()
 const router = useRouter()
@@ -30,10 +31,12 @@ const scrollTop = () => window.scrollTo({ top: 0, behavior: prefersReduced ? 'au
 function runJudgment(jid){
   const J = JUDGMENTS[jid]
   if(!J) return
+  const end = beginTask('judge', J.name)
   current.value = J
   notFound.value = ''
   desc.value = J.name
   selected.value = 'def'
+  end('success', '推理图谱已生成')
   scrollTop()
 }
 
@@ -45,8 +48,11 @@ function submit(){
     route.query.j === hit[1] ? runJudgment(hit[1]) : router.push({ name: 'judge', query: { j: hit[1] } })
     return
   }
+  // 未收录：记一次失败任务，供监控错误率统计
+  const end = beginTask('judge', `「${q}」`)
   current.value = null
   notFound.value = q
+  end('failed', '行为未收录')
   scrollTop()
 }
 

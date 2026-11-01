@@ -266,15 +266,25 @@ async function runNode(node, env){
     case 'knowledge':
       return { chunks: searchStatutes(pickText(d.input, ctx, outs), d.topK) }
     case 'llm': {
-      resolveRefs(d.prompt, ctx) // 预热模板解析；正文由 composeLlm 依上下文拼装
+      const promptText = resolveRefs(d.prompt, ctx) // 预热模板解析；正文由 composeLlm 依上下文拼装
       const text = composeLlm(ctx)
-      // 模拟流式输出：按小块逐字回调
+      // 模拟流式输出：按小块逐字回调，同时实测首字延迟（TTFT）与解码吞吐
       const step = 3
+      const tGen = performance.now()
+      let firstAt = null
       for(let i = 0; i < text.length; i += step){
         if(signal?.aborted) throw new DOMException('已停止', 'AbortError')
         hooks.onToken?.(node.id, text.slice(i, i + step))
+        if(firstAt == null) firstAt = performance.now()
         await sleep(14, signal)
       }
+      const tEnd = performance.now()
+      hooks.onLlmMetric?.({
+        ttftMs: firstAt == null ? 0 : firstAt - tGen,
+        totalMs: tEnd - tGen,
+        chars: text.length,
+        promptChars: (promptText || '').length
+      })
       return { text }
     }
     case 'code': {

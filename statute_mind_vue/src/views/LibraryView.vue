@@ -7,6 +7,7 @@ import { store } from '@/store/app'
 import { useNav } from '@/composables/useNav'
 import { CATS, STATUTES } from '@/data/mock'
 import { prefersReduced } from '@/utils/env'
+import { beginTask } from '@/monitor/metrics'
 
 const route = useRoute()
 const router = useRouter()
@@ -47,6 +48,7 @@ function flashRow(id){
 let upTimer = null
 function doUpload(name){
   if(uploading.value) return
+  const end = beginTask('import', name)
   uploading.value = true
   upName.value = name
   upP.value = 0
@@ -62,6 +64,7 @@ function doUpload(name){
       setTimeout(() => {
         store.uploaded.forEach(u => flashRow(u.id))
         uploading.value = false
+        end('success', '入库 2 条')
       }, 500)
     }
   }, prefersReduced ? 10 : 110)

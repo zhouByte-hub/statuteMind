@@ -20,6 +20,7 @@ import WfRunPanel from '@/components/workflow/WfRunPanel.vue'
 import { NODE_TYPES, createNode } from '@/workflow/registry'
 import { runFlow } from '@/workflow/executor'
 import { loadStore, saveFlow, addFlow, removeFlow, setActive } from '@/workflow/storage'
+import { beginTask, countNode, recordLlm } from '@/monitor/metrics'
 
 const allTypes = Object.keys(NODE_TYPES)
 
@@ -244,6 +245,7 @@ async function doRun(){
   runErr.value = ''
   running.value = true
   showRun.value = true
+  const endTask = beginTask('workflow', flowName.value || '未命名流程')
 
   const finished = runFlow(
     { name: flowName.value, nodes: nodes.value, edges: edges.value, input: { ...runInput } },
@@ -252,6 +254,8 @@ async function doRun(){
         const e = edges.value.find(x => x.id === id)
         if(e) e.data = { ...(e.data || {}), active: s === 'active', done: s === 'done' }
       },
+      onNodeFinish: (id, status) => { countNode(status === 'success') },
+      onLlmMetric: recordLlm,
       onToken: t => { runAnswer.value += t }
     },
     abortCtl.signal
@@ -261,8 +265,14 @@ async function doRun(){
     runLogs.value = r.logs
     runMs.value = r.ms
     if(r.answer) runAnswer.value = r.answer
+    endTask('success', `${r.logs.length} 个节点 · ${r.ms}ms`)
   }catch(err){
-    if(err?.name !== 'AbortError') runErr.value = err?.message || '运行出错'
+    if(err?.name !== 'AbortError'){
+      runErr.value = err?.message || '运行出错'
+      endTask('failed', err?.message || '运行出错')
+    }else{
+      endTask('skipped', '已手动停止')
+    }
   }finally{
     running.value = false
   }

@@ -9,7 +9,8 @@ const NAVS = [
   { name: 'search', label: '法条检索' },
   { name: 'judge', label: '行为判断' },
   { name: 'library', label: '知识库' },
-  { name: 'workflow', label: '工作流' }
+  { name: 'workflow', label: '工作流' },
+  { name: 'monitor', label: '运行监控' }
 ]
 
 /** 上传入库后徽标跳动一次 */
@@ -45,7 +46,8 @@ nav a.on{color:var(--blue);font-weight:700;border-color:var(--blue)}
 .badge b{color:var(--blue)}
 .badge.tick{animation:tick .5s var(--ease)}
 @media (max-width:760px){
-  .top{padding:0 14px;gap:14px}
+  .top{padding:0 14px;gap:14px;overflow-x:auto;scrollbar-width:none}
+  .top::-webkit-scrollbar{display:none}
   nav{gap:14px}
   nav a{padding:19px 0 17px;font-size:13px}
   .badge{display:none}

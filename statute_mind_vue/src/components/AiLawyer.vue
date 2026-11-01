@@ -2,6 +2,7 @@
 /** AI 小法：全局法律咨询对话助手。默认悬浮球，点击展开对话面板（纯前端演示问答）。 */
 import { ref, reactive, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { beginTask } from '@/monitor/metrics'
 
 const router = useRouter()
 const open = ref(false)
@@ -83,6 +84,7 @@ function push(m){
 function send(text){
   const q = (text ?? draft.value).trim()
   if(!q || typing.value) return
+  const end = beginTask('chat', q.length > 12 ? q.slice(0, 12) + '…' : q)
   draft.value = ''
   push({ role: 'user', text: q })
   typing.value = true
@@ -101,6 +103,7 @@ function send(text){
     else{
       if(acts) echo.acts = acts
       typing.value = false
+      end(rule ? 'success' : 'failed', rule ? '命中知识条目' : '未命中，已回退兜底话术')
     }
   }
   setTimeout(tick, 260)
