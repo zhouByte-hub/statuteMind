@@ -11,6 +11,7 @@ const router = createRouter({
     { path: '/workflow', name: 'workflow', component: () => import('@/views/WorkflowHome.vue') },
     { path: '/workflow/:id', name: 'workflow-edit', component: () => import('@/views/WorkflowView.vue') },
     { path: '/monitor', name: 'monitor', component: () => import('@/views/MonitorView.vue') },
+    { path: '/statute/:id', name: 'statute', component: () => import('@/views/StatuteView.vue') },
     { path: '/:pathMatch(.*)*', redirect: { name: 'search' } }
   ],
   scrollBehavior: () => ({ top: 0 })

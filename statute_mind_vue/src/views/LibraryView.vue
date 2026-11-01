@@ -18,6 +18,7 @@ const uploading = ref(false)
 const upName = ref('')
 const upP = ref(0)
 const upTxt = ref('0%')
+const fileEl = ref(null)
 const flashSeqs = reactive({}) // 条目 id → 定位高亮触发序号
 
 const all = computed(() => [...store.uploaded, ...STATUTES])
@@ -77,6 +78,14 @@ function onDrop(e){
   doUpload(f ? f.name : '演示文件_劳动争议案例汇编.pdf')
 }
 
+/** 点击上传：打开系统文件选择框（选择真实文件名，解析仍为演示流程） */
+function pickFile(){ fileEl.value?.click() }
+function onPicked(e){
+  const f = e.target.files?.[0]
+  if(f) doUpload(f.name)
+  e.target.value = '' // 允许重复选择同一文件
+}
+
 /** 「在知识库查看」深链：定位 + 蓝底高亮；随后清参便于同条目重复触发 */
 watch(() => route.query.lib, async id => {
   if(!id) return
@@ -94,8 +103,8 @@ watch(() => store.replay, r => { if(r?.type === 'library') flashRow(r.id) })
       <div class="libHeadRow">
         <h1>知识库 <span class="demoTag">演示数据</span></h1>
         <button
-          class="drop" :class="{ over }" aria-label="上传文档扩充知识库（模拟流程）"
-          @click="doUpload('演示文件_劳动争议案例汇编.pdf')"
+          class="drop" :class="{ over }" aria-label="上传文档扩充知识库（模拟解析流程）"
+          @click="pickFile"
           @dragover.prevent="over = true" @dragenter.prevent="over = true"
           @dragleave.prevent="over = false" @drop.prevent="onDrop"
         >
@@ -103,8 +112,10 @@ watch(() => store.replay, r => { if(r?.type === 'library') flashRow(r.id) })
             <path d="M12 16V5m0 0 4 4m-4-4-4 4" stroke="#4E6EF2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke="#4E6EF2" stroke-width="2" stroke-linecap="round"/>
           </svg>
-          <span>上传文档，扩充知识库<span>点击选择或拖入文件 · 模拟流程</span></span>
+          <span>上传文档，扩充知识库<span>点击选择或拖入文件 · 解析为演示流程</span></span>
         </button>
+        <!-- 隐藏的文件选择框：点击上传按钮时触发 -->
+        <input ref="fileEl" type="file" accept=".pdf,.doc,.docx,.txt,.md" class="filePick" aria-hidden="true" tabindex="-1" @change="onPicked">
       </div>
       <p class="libMeta">
         精选内置 <b class="num-tab">{{ STATUTES.length }}</b> 条真实条文节引 + 导入 <b class="num-tab">{{ store.uploaded.length }}</b> 条演示条目，可被「法条检索」与「行为判断」引用；上传后新条目将入库（此原型不真正解析文件）。
@@ -133,6 +144,7 @@ watch(() => store.replay, r => { if(r?.type === 'library') flashRow(r.id) })
 .libHeadRow h1{font-size:24px;font-weight:900}
 .drop{margin-left:auto;display:inline-flex;align-items:center;gap:10px;border:1.5px dashed #C9CED8;border-radius:10px;background:#fff;padding:9px 16px;font:600 13px 'Noto Sans SC',sans-serif;color:var(--ink2);text-align:left;transition:border-color .2s,background .2s}
 .drop:hover,.drop.over{border-color:var(--blue);background:#F5F7FF}
+.filePick{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .drop span{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:1px}
 .libMeta{margin-top:12px;font-size:13px;color:var(--muted);line-height:1.8;animation:rise .5s .06s var(--ease) both}
 .uplog{margin-top:14px;font-size:12.5px;color:var(--muted);animation:rise .4s var(--ease)}

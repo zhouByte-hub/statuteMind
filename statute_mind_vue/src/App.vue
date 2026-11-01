@@ -8,7 +8,7 @@ import { prefersReduced } from '@/utils/env'
 
 /** 顶部导航顺序：向右切换新页从右滑入，向左切换从左滑入（PPT 式） */
 const ORDER = ['search', 'judge', 'library', 'workflow', 'workflow-edit', 'monitor']
-const idx = n => (n === 'workflow-edit' ? 3 : ORDER.indexOf(n))
+const idx = n => (n === 'workflow-edit' ? 3 : n === 'statute' ? 0 : ORDER.indexOf(n))
 
 const route = useRoute()
 const tname = ref('')

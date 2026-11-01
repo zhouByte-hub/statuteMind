@@ -18,10 +18,15 @@ export function useNav(){
     if(route.name === 'library' && route.query.lib === libId) store.requestReplay('library', libId)
     else router.push({ name: 'library', query: { lib: libId } })
   }
+  /** 打开法条详情页 */
+  const openStatute = id => {
+    if(route.name === 'statute' && route.params.id === id) store.requestReplay('statute', id)
+    else router.push({ name: 'statute', params: { id } })
+  }
   /** 打开工作流编排画布 */
   const openWorkflow = () => router.push({ name: 'workflow' })
   /** 回到检索首页态（清除 q） */
   const goHome = () => router.push({ name: 'search' })
 
-  return { openSearch, openJudgment, openLibrary, openWorkflow, goHome }
+  return { openSearch, openJudgment, openLibrary, openStatute, openWorkflow, goHome }
 }
