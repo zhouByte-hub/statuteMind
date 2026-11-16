@@ -1,20 +1,15 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive } from 'vue'
 import StatCard from '@/components/monitor/StatCard.vue'
 import LineChart from '@/components/monitor/LineChart.vue'
 import DonutChart from '@/components/monitor/DonutChart.vue'
+import CalendarPanel from '@/components/monitor/CalendarPanel.vue'
 import { monitor } from '@/monitor/metrics'
 
-/** 可配置刷新间隔（秒） */
-const INTERVALS = [2, 5, 10, 30]
 const WINDOW = 60 // 图表展示最近 60s 窗口
-
-const interval = ref(5)
-const paused = ref(false)
-const updatedAt = ref('—')
 let timer = null
 
-/** 展示快照：仅按刷新节奏从采集层拷贝，暂停时冻结画面 */
+/** 展示快照：仅按刷新节奏从采集层拷贝 */
 const view = reactive({
   active: [], tasks: [], totals: { requests: 0, success: 0, failed: 0, skipped: 0, nodes: 0 },
   llm: { calls: 0, ttft: [], speed: [], outLen: [] },
@@ -31,25 +26,12 @@ function load(){
   view.llm = { calls: monitor.llm.calls, ttft: [...monitor.llm.ttft], speed: [...monitor.llm.speed], outLen: [...monitor.llm.outLen] }
   view.lastError = monitor.lastError ? { ...monitor.lastError } : null
   for(const k of Object.keys(view.series)) view.series[k] = slice(k)
-  updatedAt.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
 }
 
-function restart(){
-  clearInterval(timer)
-  if(!paused.value) timer = setInterval(load, interval.value * 1000)
-}
-function setIntervalSec(s){ interval.value = s; restart() }
-function togglePause(){
-  paused.value = !paused.value
-  restart()
-}
-function manualRefresh(){
-  paused.value = false
-  restart()
+onMounted(() => {
   load()
-}
-
-onMounted(() => { load(); restart() })
+  timer = setInterval(load, 5000)
+})
 onBeforeUnmount(() => clearInterval(timer))
 
 /* ===== 阈值与告警 ===== */
@@ -88,27 +70,6 @@ const fmtTime = ts => new Date(ts).toLocaleTimeString('zh-CN', { hour12: false }
 
 <template>
   <section class="mon" aria-label="Agent 运行监控">
-    <!-- 顶部：标题与刷新控制 -->
-    <header class="mhead">
-      <div class="ttl">
-        <h1>Agent 运行监控</h1>
-        <span class="live" :class="{ off: paused }"><i />{{ paused ? '已暂停' : '实时采集中' }}</span>
-      </div>
-      <div class="ctrl">
-        <label class="iv">刷新间隔
-          <select :value="interval" @change="setIntervalSec(+$event.target.value)">
-            <option v-for="s in INTERVALS" :key="s" :value="s">{{ s }}s</option>
-          </select>
-        </label>
-        <button class="mini" @click="togglePause">{{ paused ? '继续' : '暂停' }}</button>
-        <button class="mini pri" @click="manualRefresh">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 3v4h-4"/></svg>
-          手动刷新
-        </button>
-        <span class="upd num-tab">更新于 {{ updatedAt }}</span>
-      </div>
-    </header>
-
     <!-- 异常告警条 -->
     <div v-if="alerts.length" class="alarms" role="alert">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 1 21h22L12 2Zm0 7a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0v-4a1 1 0 0 1 1-1Zm0 9.2a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4Z"/></svg>
@@ -144,26 +105,35 @@ const fmtTime = ts => new Date(ts).toLocaleTimeString('zh-CN', { hour12: false }
       </div>
     </section>
 
-    <!-- 三、大模型推理 -->
-    <section class="grp">
-      <h2><i class="gi" />大模型推理 <em class="gtag">工作流 LLM 节点实测</em></h2>
-      <div class="cards">
-        <StatCard label="LLM 调用次数" :value="llmAgg.calls" unit="次" sub="最近 60 次滑动窗口" />
-        <StatCard label="首 Token 延迟" :value="llmAgg.ttft ?? '—'" unit="ms" :status="llmTtftOk ? 'ok' : 'warn'" :sub="`最近一次 ${llmAgg.last ?? '—'}ms · 阈值 ≤ ${TH.ttftMax}ms`" />
-        <StatCard label="平均生成速度" :value="llmAgg.speed ?? '—'" unit="字/s" sub="输出字符 / 生成耗时" />
-        <StatCard label="平均输出长度" :value="llmAgg.outLen ?? '—'" unit="字" sub="单次生成字符数" />
-      </div>
-      <div class="charts two">
-        <div class="chartbox">
-          <h3>首 Token 延迟 <em>ms · 按调用</em></h3>
-          <LineChart :series="[{ name: 'TTFT', color: '#C63A30', points: [...view.llm.ttft].reverse() }]" unit="ms" />
+    <!-- 三、大模型推理 + 运行日历（各占 1/2） -->
+    <div class="duo">
+      <section class="grp">
+        <h2><i class="gi" />大模型推理 <em class="gtag">工作流 LLM 节点实测</em></h2>
+        <div class="cards four">
+          <StatCard label="LLM 调用次数" :value="llmAgg.calls" unit="次" sub="最近 60 次滑动窗口" />
+          <StatCard label="首 Token 延迟" :value="llmAgg.ttft ?? '—'" unit="ms" :status="llmTtftOk ? 'ok' : 'warn'" :sub="`最近一次 ${llmAgg.last ?? '—'}ms · 阈值 ≤ ${TH.ttftMax}ms`" />
+          <StatCard label="平均生成速度" :value="llmAgg.speed ?? '—'" unit="字/s" sub="输出字符 / 生成耗时" />
+          <StatCard label="平均输出长度" :value="llmAgg.outLen ?? '—'" unit="字" sub="单次生成字符数" />
         </div>
-        <div class="chartbox">
-          <h3>生成速度 <em>字/s · 按调用</em></h3>
-          <LineChart :series="[{ name: '生成速度', color: '#7A5AF8', points: [...view.llm.speed].reverse() }]" unit="字/s" />
+        <div class="charts two">
+          <div class="chartbox">
+            <h3>首 Token 延迟 <em>ms · 按调用</em></h3>
+            <LineChart :series="[{ name: 'TTFT', color: '#C63A30', points: [...view.llm.ttft].reverse() }]" unit="ms" />
+          </div>
+          <div class="chartbox">
+            <h3>生成速度 <em>字/s · 按调用</em></h3>
+            <LineChart :series="[{ name: '生成速度', color: '#7A5AF8', points: [...view.llm.speed].reverse() }]" unit="字/s" />
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <section class="grp">
+        <h2><i class="gi" />运行日历 <em class="gtag">按日聚合 · 悬浮查看当日指标</em></h2>
+        <div class="chartbox calbox">
+          <CalendarPanel />
+        </div>
+      </section>
+    </div>
 
     <!-- 四、性能与流量 -->
     <section class="grp">
@@ -190,21 +160,6 @@ const fmtTime = ts => new Date(ts).toLocaleTimeString('zh-CN', { hour12: false }
 <style scoped>
 .mon{width:min(1180px,100%);margin:0 auto;padding:26px 28px 48px;display:flex;flex-direction:column;gap:22px}
 
-/* 顶部控制区 */
-.mhead{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.ttl{display:flex;align-items:baseline;gap:14px}
-h1{font-size:21px;font-weight:800;color:var(--ink)}
-.live{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#1E7A44;font-weight:600}
-.live i{width:7px;height:7px;border-radius:50%;background:#2E9E5B;animation:pulse 1.6s infinite}
-.live.off{color:var(--muted)}
-.live.off i{background:var(--faint);animation:none}
-@keyframes pulse{50%{opacity:.35}}
-.ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.iv{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)}
-.iv select{font:600 12.5px inherit;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:4.5px 8px;background:#fff;cursor:pointer}
-.iv select:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
-.upd{font-size:12px;color:var(--faint)}
-
 /* 告警条 */
 .alarms{display:flex;gap:10px;align-items:flex-start;background:#FDF3F2;border:1px solid #E7B7B2;border-radius:12px;padding:12px 16px;color:var(--red)}
 .alarms svg{flex:none;margin-top:2px}
@@ -217,6 +172,12 @@ h1{font-size:21px;font-weight:800;color:var(--ink)}
 .gi{width:4px;height:15px;border-radius:2px;background:var(--blue)}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .cards:only-child{grid-template-columns:repeat(2,1fr)}
+
+/* 双栏：大模型推理 2/3 + 运行日历 1/3，等高 */
+.duo{display:grid;grid-template-columns:2fr 1fr;gap:22px;align-items:stretch}
+.duo .cards.four{grid-template-columns:repeat(2,1fr)}
+.duo .grp{min-width:0}
+.calbox{flex:1;display:flex;flex-direction:column;min-height:0}
 
 /* 图表区 */
 .charts{display:grid;gap:12px}
@@ -243,15 +204,15 @@ h1{font-size:21px;font-weight:800;color:var(--ink)}
 @media (max-width:1000px){
   .cards{grid-template-columns:repeat(2,1fr)}
   .charts.three{grid-template-columns:1fr 1fr}
+  .duo{grid-template-columns:1fr}
 }
 @media (max-width:760px){
   .mon{padding:18px 14px 36px;gap:16px}
-  .mhead{flex-direction:column;align-items:flex-start}
   .charts.two,.charts.three{grid-template-columns:1fr}
   .cards,.cards:only-child{grid-template-columns:repeat(2,1fr)}
   .grp{padding:14px}
 }
 @media (max-width:420px){
-  .cards,.cards:only-child{grid-template-columns:1fr}
+  .cards,.cards:only-child,.duo .cards.four{grid-template-columns:1fr}
 }
 </style>

@@ -34,7 +34,7 @@ watch(() => store.statuteCount, () => {
 </template>
 
 <style scoped>
-.top{flex:none;height:60px;display:flex;align-items:center;gap:28px;padding:0 28px;border-bottom:1px solid var(--line2)}
+.top{position:sticky;top:0;z-index:100;flex:none;height:60px;display:flex;align-items:center;gap:28px;padding:0 28px;border-bottom:1px solid var(--line2);background:#fff}
 .brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-weight:900;font-size:19px;white-space:nowrap}
 .brand em{color:var(--blue);font-style:normal}
 nav{display:flex;gap:26px}

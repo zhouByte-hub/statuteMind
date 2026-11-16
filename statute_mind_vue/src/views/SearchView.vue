@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ChipsRow from '@/components/ChipsRow.vue'
 import NoticeBox from '@/components/NoticeBox.vue'
@@ -84,6 +84,62 @@ async function resetSearch(){
   inputEl.value?.focus()
 }
 
+/** 快捷清除：有检索结果时回到首页形态，否则仅清空输入框 */
+function clearInput(){
+  route.query.q ? resetSearch() : (input.value = '', inputEl.value?.focus())
+}
+
+/* ===== 语音输入：长按麦克风说话，识别文字实时绑定到输入框（Web Speech API） ===== */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+const micOn = ref(false) // 正在录音
+const micTip = ref('')
+let recog = null
+let holding = false // 是否仍按住
+let baseText = ''   // 按下时的输入框内容，识别文字追加在其后
+let tipTimer = null
+
+function showTip(msg){
+  micTip.value = msg
+  clearTimeout(tipTimer)
+  tipTimer = setTimeout(() => { micTip.value = '' }, 2600)
+}
+
+function micStart(){
+  if(!SR){ showTip('当前浏览器不支持语音识别，请使用 Chrome / Edge'); return }
+  if(micOn.value) return
+  holding = true
+  const r = new SR()
+  recog = r
+  r.lang = 'zh-CN'
+  r.interimResults = true // 中间结果也实时上屏
+  r.maxAlternatives = 1
+  baseText = input.value
+  r.onresult = e => {
+    let final = '', interim = ''
+    for(let i = 0; i < e.results.length; i++){
+      const res = e.results[i]
+      res.isFinal ? final += res[0].transcript : interim += res[0].transcript
+    }
+    input.value = baseText + final + interim
+  }
+  r.onerror = e => {
+    if(e.error === 'not-allowed' || e.error === 'service-not-allowed') showTip('麦克风权限被拒绝，请在浏览器地址栏允许使用麦克风')
+    else if(e.error === 'no-speech') showTip('未检测到语音，请按住麦克风后说话')
+  }
+  r.onend = () => { if(holding){ try{ r.start() }catch{ /* 已释放 */ } } } // 静音自动断流时，按住期间续录
+  try{ r.start() }catch{ return }
+  micOn.value = true
+}
+
+function micStop(){
+  holding = false
+  if(recog){ try{ recog.stop() }catch{ /* 已停止 */ } recog = null }
+  micOn.value = false
+  inputEl.value?.focus()
+}
+
+onBeforeUnmount(() => { micStop(); clearTimeout(tipTimer) })
+
 /** 路由 ?q= 是检索的唯一事实源（深链 / 返回 / 重放共用） */
 watch(() => route.query.q, q => {
   if(q) runSearch(q)
@@ -109,9 +165,21 @@ watch(() => store.replay, r => { if(r?.type === 'search') runSearch(r.id) })
             placeholder="输入关键词，如：拖欠工资" aria-label="法条关键词"
             @keydown.enter="submit"
           >
+          <button v-if="input" class="clr" aria-label="清空输入" title="清空" @click="clearInput">×</button>
+          <button
+            class="mic" :class="{ on: micOn }"
+            :title="micOn ? '松开结束语音输入' : '长按说话'"
+            :aria-label="micOn ? '松开结束语音输入' : '长按开始语音输入'"
+            @mousedown.prevent="micStart" @mouseup="micStop" @mouseleave="micOn && micStop()"
+            @touchstart.prevent="micStart" @touchend.prevent="micStop" @touchcancel="micStop"
+            @keydown.enter.space.prevent="micOn ? micStop() : micStart()" @keyup.enter.space="micStop"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          </button>
           <button class="go" @click="submit">搜法条</button>
         </div>
       </div>
+      <p v-if="micTip" class="mictip" role="status">{{ micTip }}</p>
       <ChipsRow label="示例：" :items="exampleItems" @select="it => openSearch(it.value)" />
       <div class="panels">
         <!-- 检索历史（持久化） -->
@@ -180,9 +248,16 @@ watch(() => store.replay, r => { if(r?.type === 'search') runSearch(r.id) })
 /* 搜索框行：首页居中大框；检索后吸顶窄框（百度 SERP 形态） */
 .sboxRow{display:flex;justify-content:center;align-items:center;gap:16px;margin-top:30px}
 .sbox{display:flex;width:min(620px,100%)}
-.sbox input{flex:1;min-width:0;height:48px;border:2px solid var(--blue);border-right:0;border-radius:10px 0 0 10px;padding:0 16px;font:400 15px 'Noto Sans SC',sans-serif;color:var(--ink);background:#fff;transition:box-shadow .2s}
+.sbox input{flex:1;min-width:0;height:48px;border:2px solid var(--blue);border-right:0;border-radius:10px 0 0 10px;padding:0 16px;font:400 15px 'Noto Sans SC',sans-serif;color:var(--ink);background:#fff}
 .sbox input::placeholder{color:var(--faint)}
-.sbox input:focus{outline:none;box-shadow:0 0 0 4px rgba(78,110,242,.14)}
+.sbox input:focus{outline:none}
+.sbox .clr{flex:none;width:34px;height:48px;background:#fff;border:2px solid var(--blue);border-left:0;border-right:0;color:var(--faint);font-size:17px;line-height:1;transition:color .15s}
+.sbox .clr:hover{color:var(--red)}
+.sbox .mic{flex:none;width:40px;height:48px;display:grid;place-items:center;background:#fff;border:2px solid var(--blue);border-left:0;border-right:0;color:var(--muted);cursor:pointer;user-select:none;-webkit-user-select:none;transition:color .15s,background .15s}
+.sbox .mic:hover{color:var(--blue)}
+.sbox .mic.on{color:#C63A30;background:#FDF3F2;animation:micpulse 1.2s infinite}
+@keyframes micpulse{50%{box-shadow:inset 0 0 0 44px rgba(198,58,48,.07)}}
+.mictip{margin:10px 0 0;font-size:12.5px;color:var(--muted)}
 .sbox .go{flex:none;width:110px;height:48px;background:var(--blue);color:#fff;font:700 15px 'Noto Sans SC',sans-serif;border-radius:0 10px 10px 0;letter-spacing:.1em;transition:background .2s,transform .15s var(--ease)}
 .sbox .go:hover{background:var(--blue-h)}
 .sbox .go:active{transform:scale(.97)}
@@ -191,8 +266,10 @@ watch(() => store.replay, r => { if(r?.type === 'search') runSearch(r.id) })
 .compact .heroWrap{padding:0 0 6px}
 .compact .tagline,.compact .panels{display:none}
 .compact .heroWrap .chips{display:none}
-.compact .sboxRow{position:sticky;top:0;z-index:20;background:#fff;padding:12px 20px;border-bottom:1px solid var(--line)}
+.compact .sboxRow{position:sticky;top:60px;z-index:20;background:#fff;padding:12px 20px;border-bottom:1px solid var(--line)}
 .compact .sbox input,.compact .sbox .go{height:42px}
+.compact .sbox .clr{height:42px}
+.compact .sbox .mic{height:42px}
 
 /* 检索中加载条（有限进度，非无限循环） */
 .loadbar{max-width:620px;margin:16px auto 0;height:4px;border-radius:99px;background:var(--gray);overflow:hidden}
@@ -226,8 +303,12 @@ watch(() => store.replay, r => { if(r?.type === 'search') runSearch(r.id) })
   .tagline{font-size:13px}
   .panels{grid-template-columns:1fr}
   .sbox input{height:44px;font-size:14px;padding:0 12px}
+  .sbox .clr{height:44px}
+  .sbox .mic{height:44px}
   .sbox .go{width:88px;height:44px;font-size:14px}
   .compact .sbox input,.compact .sbox .go{height:40px}
+  .compact .sbox .clr{height:40px}
+  .compact .sbox .mic{height:40px}
   .serp{padding:14px 16px 60px}
 }
 </style>

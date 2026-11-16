@@ -101,7 +101,7 @@ watch(() => store.replay, r => { if(r?.type === 'library') flashRow(r.id) })
   <section class="vlib" aria-label="知识库">
     <div class="libWrap">
       <div class="libHeadRow">
-        <h1>知识库 <span class="demoTag">演示数据</span></h1>
+        <h1>知识库</h1>
         <button
           class="drop" :class="{ over }" aria-label="上传文档扩充知识库（模拟解析流程）"
           @click="pickFile"
