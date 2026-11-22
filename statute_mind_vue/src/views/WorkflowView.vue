@@ -19,7 +19,7 @@ import WfConfigDrawer from '@/components/workflow/WfConfigDrawer.vue'
 import WfRunPanel from '@/components/workflow/WfRunPanel.vue'
 import { NODE_TYPES, createNode } from '@/workflow/registry'
 import { runFlow } from '@/workflow/executor'
-import { loadStore, saveFlow, addFlow, removeFlow, setActive } from '@/workflow/storage'
+import { loadStore, saveFlow, addFlow, removeFlow, setActive, touchRun } from '@/workflow/storage'
 import { beginTask, countNode, recordLlm } from '@/monitor/metrics'
 
 const allTypes = Object.keys(NODE_TYPES)
@@ -246,6 +246,7 @@ async function doRun(){
   running.value = true
   showRun.value = true
   const endTask = beginTask('workflow', flowName.value || '未命名流程')
+  touchRun(store.activeId)
 
   const finished = runFlow(
     { name: flowName.value, nodes: nodes.value, edges: edges.value, input: { ...runInput } },

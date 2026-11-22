@@ -5,6 +5,7 @@ import LineChart from '@/components/monitor/LineChart.vue'
 import DonutChart from '@/components/monitor/DonutChart.vue'
 import CalendarPanel from '@/components/monitor/CalendarPanel.vue'
 import { monitor } from '@/monitor/metrics'
+import headerImg from '@/assets/analysis_header.png'
 
 const WINDOW = 60 // 图表展示最近 60s 窗口
 let timer = null
@@ -70,6 +71,9 @@ const fmtTime = ts => new Date(ts).toLocaleTimeString('zh-CN', { hour12: false }
 
 <template>
   <section class="mon" aria-label="Agent 运行监控">
+    <!-- 顶部横幅 -->
+    <img class="hero" :src="headerImg" alt="运行监控" />
+
     <!-- 异常告警条 -->
     <div v-if="alerts.length" class="alarms" role="alert">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 1 21h22L12 2Zm0 7a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0v-4a1 1 0 0 1 1-1Zm0 9.2a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4Z"/></svg>
@@ -159,6 +163,9 @@ const fmtTime = ts => new Date(ts).toLocaleTimeString('zh-CN', { hour12: false }
 
 <style scoped>
 .mon{width:min(1180px,100%);margin:0 auto;padding:26px 28px 48px;display:flex;flex-direction:column;gap:22px}
+
+/* 顶部横幅图 */
+.hero{width:100%;display:block;border-radius:16px;object-fit:cover;aspect-ratio:20/3}
 
 /* 告警条 */
 .alarms{display:flex;gap:10px;align-items:flex-start;background:#FDF3F2;border:1px solid #E7B7B2;border-radius:12px;padding:12px 16px;color:var(--red)}

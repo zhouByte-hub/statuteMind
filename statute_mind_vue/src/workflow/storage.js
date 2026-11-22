@@ -1,6 +1,6 @@
 /**
  * 工作流本地持久化：多流程列表（localStorage，key 带版本号，仅存可序列化纯数据）。
- * 数据结构：{ activeId, flows: [{ id, name, nodes, edges, updatedAt }] }
+ * 数据结构：{ activeId, flows: [{ id, name, nodes, edges, updatedAt, createdAt, lastRunAt }] }
  */
 import { reactive } from 'vue'
 import { makeSampleFlow } from './sampleFlow'
@@ -27,7 +27,9 @@ function sanitizeFlow(f){
     name: f.name || '未命名流程',
     nodes: stripRunState(f.nodes),
     edges: Array.isArray(f.edges) ? f.edges : [],
-    updatedAt: f.updatedAt || Date.now()
+    updatedAt: f.updatedAt || Date.now(),
+    createdAt: f.createdAt || f.updatedAt || Date.now(),
+    lastRunAt: f.lastRunAt || 0
   }
 }
 
@@ -43,7 +45,9 @@ export function blankFlow(){
     name: '未命名流程',
     nodes: [createNode('start', { x: 140, y: 240 })],
     edges: [],
-    updatedAt: Date.now()
+    updatedAt: Date.now(),
+    createdAt: Date.now(),
+    lastRunAt: 0
   }
 }
 
@@ -125,4 +129,14 @@ export function setActive(id){
     persist(store)
   }
   return store
+}
+
+/** 记录流程最近一次运行时间（不改 updatedAt，避免污染「最近编辑」排序） */
+export function touchRun(id){
+  const store = loadStore()
+  const f = store.flows.find(x => x.id === id)
+  if(f){
+    f.lastRunAt = Date.now()
+    persist(store)
+  }
 }

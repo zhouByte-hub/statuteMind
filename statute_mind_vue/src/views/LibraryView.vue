@@ -5,13 +5,13 @@ import ChipsRow from '@/components/ChipsRow.vue'
 import LibRow from '@/components/LibRow.vue'
 import { store } from '@/store/app'
 import { useNav } from '@/composables/useNav'
-import { CATS, STATUTES } from '@/data/mock'
+import { CATS, STATUTES, statuteDetail } from '@/data/mock'
 import { prefersReduced } from '@/utils/env'
 import { beginTask } from '@/monitor/metrics'
 
 const route = useRoute()
 const router = useRouter()
-const { openSearch } = useNav()
+const { openSearch, openStatute } = useNav()
 
 const over = ref(false)
 const uploading = ref(false)
@@ -35,6 +35,35 @@ const catItems = computed(() => CATS
     active: store.catFilter === c
   })))
 const filtered = computed(() => all.value.filter(s => store.catFilter === '全部' || s.cat === store.catFilter))
+
+/** 右栏分类分布：内置分类按 CATS 序排列，导入类垫后 */
+const distItems = computed(() => [
+  ...CATS.slice(1).filter(c => counts.value[c]).map(c => ({ name: c, n: counts.value[c] })),
+  ...(counts.value['导入'] ? [{ name: '导入', n: counts.value['导入'] }] : [])
+])
+
+/** 时间轴：每部法律按其在库中的首条条文取现行版本时间，倒序（避免同法多条挤占年份） */
+const tlItems = computed(() => {
+  const seen = new Set()
+  const items = []
+  for (const s of STATUTES) {
+    if (seen.has(s.law)) continue
+    seen.add(s.law)
+    items.push({ ...s, date: statuteDetail(s.id)?.meta.versions[0]?.date || '' })
+  }
+  return items.sort((a, b) => b.date.localeCompare(a.date))
+})
+
+/** 时间轴按年份分组（tlItems 已倒序） */
+const tlGroups = computed(() => {
+  const map = new Map()
+  for (const s of tlItems.value) {
+    const y = s.date.slice(0, 4)
+    if (!map.has(y)) map.set(y, [])
+    map.get(y).push(s)
+  }
+  return [...map.entries()].map(([year, items]) => ({ year, items }))
+})
 const rows = computed(() => {
   const order = store.catFilter === '全部' ? ['导入', ...CATS.slice(1)].filter(g => filtered.value.some(s => s.cat === g)) : [store.catFilter]
   let i = 0
@@ -134,11 +163,71 @@ watch(() => store.replay, r => { if(r?.type === 'library') flashRow(r.id) })
         <LibRow v-for="r in g.items" :key="r.s.id" :s="r.s" :index="r.i" :flash-seq="flashSeqs[r.s.id] || 0" />
       </div>
     </div>
+
+    <!-- 右侧栏（宽屏显示）：分类分布 + 重点条文 + 上传指引 -->
+    <aside class="rail" aria-label="知识库分类与指引">
+      <div class="railIn">
+        <div class="card">
+          <h2>分类分布</h2>
+          <button v-for="c in distItems" :key="c.name" class="navrow" @click="store.setFilter(c.name)">
+            <b>{{ c.name }}</b><span class="cnt num-tab">{{ c.n }} 条</span>
+          </button>
+        </div>
+        <div class="card">
+          <h2>最新法规条文</h2>
+          <div class="tl">
+            <div v-for="g in tlGroups" :key="g.year" class="tlyear">
+              <span class="tly num-tab">{{ g.year }}</span>
+              <button v-for="s in g.items" :key="s.id" class="tlrow" @click="openStatute(s.id)">
+                <b>{{ s.law }}{{ s.art }}</b>
+                <em class="num-tab">{{ s.date }}</em>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>上传指引</h2>
+          <p class="gr"><b>支持格式</b>PDF · Word · TXT · Markdown</p>
+          <p class="gr"><b>上传方式</b>点击选择，或直接拖入文件</p>
+          <p class="gr"><b>入库流程</b>解析 → 切分 → 可被检索与判断引用</p>
+          <p class="gcap">当前 内置 {{ STATUTES.length }} 条 · 导入 {{ store.uploaded.length }} 条 · 演示流程不真正解析文件</p>
+        </div>
+      </div>
+    </aside>
   </section>
 </template>
 
 <style scoped>
-.vlib{display:block;animation:fadein .25s both}
+/* 宽屏两列：主列 + 右侧统计栏，整组居中；外缘留白吸收超宽屏 */
+.vlib{display:grid;grid-template-columns:minmax(460px,760px) 320px;column-gap:24px;justify-content:center;padding:0 20px;animation:fadein .25s both}
+.vlib>.libWrap{grid-column:1;min-width:0}
+.vlib>.rail{grid-column:2;min-width:0}
+.railIn{position:sticky;top:84px;display:flex;flex-direction:column;gap:16px;animation:rise .5s var(--ease) both}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card h2{margin:0 0 6px;font-size:13px;font-weight:700;color:var(--ink2)}
+.navrow{display:flex;align-items:center;gap:8px;width:100%;padding:7px 8px;border-radius:8px;font-size:13.5px;color:var(--ink2);transition:background .15s}
+.navrow b{font-weight:500;flex:none}
+.navrow .cnt{margin-left:auto;font-size:11.5px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.navrow:hover{background:var(--gray)}
+/* 最新法规条文垂直时间轴 */
+.tl{position:relative;margin-top:8px;padding-left:20px}
+.tl::before{content:"";position:absolute;left:6px;top:10px;bottom:10px;width:2px;background:var(--line)}
+.tly{display:inline-block;margin:10px 0 2px;padding:1px 8px;border-radius:99px;background:var(--gray);font-size:11px;font-weight:700;color:var(--ink2);position:relative}
+.tly::before{content:"";position:absolute;left:-19px;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:99px;background:var(--blue);border:2px solid #fff;box-sizing:content-box}
+.tlrow{display:flex;align-items:center;gap:8px;width:100%;padding:5px 6px;border-radius:8px;font-size:12.5px;color:var(--ink2);transition:background .15s}
+.tlrow b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tlrow em{font-style:normal;margin-left:auto;flex:none;font-size:11px;color:var(--faint)}
+.tlrow:hover{background:var(--gray)}
+.gr{display:flex;gap:10px;margin:0;padding:4px 0;font-size:12.5px;line-height:1.7;color:var(--muted)}
+.gr b{flex:none;font-weight:600;color:var(--ink2)}
+.gcap{margin:0 0 4px;font-size:11.5px;line-height:1.7;color:var(--faint)}
+
+/* ≤1200px 降级：侧栏隐藏，恢复主列居中的原始布局 */
+@media (max-width:1200px){
+  .vlib{display:block;padding:0}
+  .rail{display:none}
+}
+
 .libWrap{max-width:760px;margin:0 auto;padding:34px 20px 80px}
 .libHeadRow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;animation:rise .5s var(--ease) both}
 .libHeadRow h1{font-size:24px;font-weight:900}

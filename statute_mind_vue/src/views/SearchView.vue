@@ -247,7 +247,7 @@ watch(() => store.replay, r => { if(r?.type === 'search') runSearch(r.id) })
 
 /* 搜索框行：首页居中大框；检索后吸顶窄框（百度 SERP 形态） */
 .sboxRow{display:flex;justify-content:center;align-items:center;gap:16px;margin-top:30px}
-.sbox{display:flex;width:min(620px,100%)}
+.sbox{display:flex;width:min(750px,100%)}
 .sbox input{flex:1;min-width:0;height:48px;border:2px solid var(--blue);border-right:0;border-radius:10px 0 0 10px;padding:0 16px;font:400 15px 'Noto Sans SC',sans-serif;color:var(--ink);background:#fff}
 .sbox input::placeholder{color:var(--faint)}
 .sbox input:focus{outline:none}
