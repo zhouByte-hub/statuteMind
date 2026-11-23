@@ -1,1 +1,10 @@
-/Users/zhoubyte/project/java/statuteMind/statute_mind_main/scorpio_import/src/main/java/com/zhoubyte/App.java
+/Users/zhoubyte/project/java/statuteMind/statute_mind_main/scorpio_import/src/main/java/com/zhoubyte/block/Block.java
+/Users/zhoubyte/project/java/statuteMind/statute_mind_main/scorpio_import/src/main/java/com/zhoubyte/block/BlockType.java
+/Users/zhoubyte/project/java/statuteMind/statute_mind_main/scorpio_import/src/main/java/com/zhoubyte/block/ParsedDocument.java
+/Users/zhoubyte/project/java/statuteMind/statute_mind_main/scorpio_import/src/main/java/com/zhoubyte/config/ImportProperties.java
+/Users/zhoubyte/project/java/statuteMind/statute_mind_main/scorpio_import/src/main/java/com/zhoubyte/parser/DocumentParser.java
+/Users/zhoubyte/project/java/statuteMind/statute_mind_main/scorpio_import/src/main/java/com/zhoubyte/parser/ExcelParser.java
+/Users/zhoubyte/project/java/statuteMind/statute_mind_main/scorpio_import/src/main/java/com/zhoubyte/parser/MarkdownParser.java
+/Users/zhoubyte/project/java/statuteMind/statute_mind_main/scorpio_import/src/main/java/com/zhoubyte/parser/ParserRouter.java
+/Users/zhoubyte/project/java/statuteMind/statute_mind_main/scorpio_import/src/main/java/com/zhoubyte/parser/PdfParser.java
+/Users/zhoubyte/project/java/statuteMind/statute_mind_main/scorpio_import/src/main/java/com/zhoubyte/parser/WordParser.java

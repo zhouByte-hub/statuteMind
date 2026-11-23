@@ -1,0 +1,21 @@
+{
+  "groups": [
+    {
+      "name": "scorpio.import",
+      "type": "com.zhoubyte.config.ImportProperties",
+      "sourceType": "com.zhoubyte.config.ImportProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "scorpio.import.support",
+      "type": "java.util.List<java.lang.String>",
+      "description": "支持导入的文件扩展名",
+      "sourceType": "com.zhoubyte.config.ImportProperties"
+    }
+  ],
+  "hints": [],
+  "ignored": {
+    "properties": []
+  }
+}

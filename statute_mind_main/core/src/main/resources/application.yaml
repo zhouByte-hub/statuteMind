@@ -5,6 +5,10 @@ server:
 spring:
   application:
     name: core
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 500MB
   ai:
     ollama:
       base-url: http://localhost:11434
@@ -17,3 +21,14 @@ spring:
       host: localhost
       port: 16379
       database: 0
+
+scorpio:
+  import:
+    support:
+      - md
+      - markdown
+      - docx
+      - xlsx
+      - xlsm
+      - pdf
+    import-file-size: 10
