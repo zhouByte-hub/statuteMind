@@ -1,13 +1,13 @@
-package com.zhoubyte.statute_mind_main;
+package com.zhoubyte.core;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class StatuteMindMainApplication {
+public class CoreApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(StatuteMindMainApplication.class, args);
+        SpringApplication.run(CoreApplication.class, args);
     }
 
 }

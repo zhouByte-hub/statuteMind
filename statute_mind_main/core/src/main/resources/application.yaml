@@ -1,10 +1,10 @@
 server:
   port: 9527
   servlet:
-    context-path: /statute_mind
+    context-path: /statuteMind
 spring:
   application:
-    name: statute_mind_main
+    name: core
   ai:
     ollama:
       base-url: http://localhost:11434
@@ -12,4 +12,8 @@ spring:
         model: qwen2.5:3b-instruct
       embedding:
         model: nomic-embed-text
-
+  data:
+    redis:
+      host: localhost
+      port: 16379
+      database: 0
