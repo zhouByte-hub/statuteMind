@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 public class ExcelParser implements DocumentParser{
 
     @Override
-    public boolean supper(String extension) {
-        return "xlsx".equals(extension) || "xlsm".equals(extension) || "xls".equals(extension);
+    public boolean support(String extension) {
+        return "XLSX".equals(extension) || "XLSM".equals(extension) || "XLS".equals(extension);
     }
 
     @Override

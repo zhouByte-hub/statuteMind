@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 public class PdfParser implements DocumentParser{
 
     @Override
-    public boolean supper(String extension) {
-        return "pdf".equals(extension);
+    public boolean support(String content) {
+        return "PDF".equals(content);
     }
 
     @Override

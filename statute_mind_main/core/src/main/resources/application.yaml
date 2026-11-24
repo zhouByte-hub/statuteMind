@@ -32,3 +32,9 @@ scorpio:
       - xlsm
       - pdf
     import-file-size: 10
+  chunk:
+    chunk-size: 500
+    overlap: 50
+    max-table-chars: 6000
+    semantic: false
+    cjk-size: 3

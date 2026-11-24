@@ -7,12 +7,14 @@ import org.springframework.stereotype.Component;
 public class WordParser implements DocumentParser{
 
     @Override
-    public boolean supper(String extension) {
-        return "docx".equals(extension);
+    public boolean support(String content) {
+        return "DOCX".equals(content);
     }
 
     @Override
     public ParsedDocument parse(byte[] documentData, String filename) {
         return null;
     }
+
+
 }

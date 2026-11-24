@@ -7,10 +7,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -25,18 +25,12 @@ public class ParserRouter {
         return importProperties.getSupport();
     }
 
-    // 文件名 -> 文件数据
-    public List<ParsedDocument> parseDocuments(Map<String, byte[]> data) {
-        if(data.size() > importProperties.getImportFileSize()) {
-            log.info("data的数量为：{}", data.size());
-            throw new RuntimeException("单次导入文件数不能超过"+importProperties.getImportFileSize()+"个");
-        }
-        return data.entrySet().stream()
-                .map(item -> parse(item.getKey(), item.getValue()))
-                .toList();
+    public Integer importFileSize(){
+        return importProperties.getImportFileSize();
     }
 
-    public ParsedDocument parse(String filename, byte[] data) {
+    public ParsedDocument parse(InputStream inputStream, String filename) throws IOException {
+        byte[] data = inputStream.readAllBytes();
         if(StringUtils.isEmpty(filename)) {
             throw new RuntimeException("导入的文件未解析到文件名");
         }
@@ -45,7 +39,7 @@ public class ParserRouter {
             throw new RuntimeException("未解析到后缀信息");
         }
         List<DocumentParser> parserList = parsers.stream()
-                .filter(parse -> parse.supper(extension.toLowerCase(Locale.ROOT)))
+                .filter(parse -> parse.support(extension.toLowerCase(Locale.ROOT)))
                 .toList();
         if(parserList.isEmpty()) {
             throw new RuntimeException("暂不支持解析[" + extension + "]格式文件");

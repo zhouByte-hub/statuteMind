@@ -7,12 +7,15 @@ import org.springframework.stereotype.Component;
 public class MarkdownParser implements DocumentParser{
 
     @Override
-    public boolean supper(String extension) {
-        return "md".equals(extension);
+    public boolean support(String content) {
+        return "MD".equals(content) || "MARKDOWN".equals(content);
     }
+
 
     @Override
     public ParsedDocument parse(byte[] documentData, String filename) {
         return null;
     }
+
+
 }
