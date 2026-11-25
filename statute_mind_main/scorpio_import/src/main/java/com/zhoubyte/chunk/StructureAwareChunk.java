@@ -26,6 +26,9 @@ public class StructureAwareChunk {
         return this.chunk(document, chunkProperties);
     }
 
+    /**
+     * 结构化chunk
+     */
     public List<ChunkResult> chunk(ParsedDocument document, ChunkProperties chunkProperties) {
         List<ChunkResult> result = new LinkedList<>();
         Deque<int[]> titleStack = new ArrayDeque<>(); // [level, index]
@@ -46,8 +49,11 @@ public class StructureAwareChunk {
                 if(!chunkExecute.support(block.getType().name())){
                     continue;
                 }
-                ChunkResult chunkResult = chunkExecute.blockToChunk(block, sectionPath, chunkProperties);
-                result.add(chunkResult);
+                List<ChunkResult> chunkResult = chunkExecute.blockToChunk(block, sectionPath, chunkProperties);
+                if(chunkResult.isEmpty()) {
+                    continue;
+                }
+                result.addAll(chunkResult);
             }
         }
         return result;

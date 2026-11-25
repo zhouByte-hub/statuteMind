@@ -11,7 +11,11 @@ import java.util.Locale;
  */
 public class SimpleTokenizer {
 
-    public static List<String> tokenizer(String text, Integer cjkSize) {
+    public static String preHandleTokenizer(String text, Integer cjkSize) {
+        return String.join(" ", tokenizer(text, cjkSize));
+    }
+
+    private static List<String> tokenizer(String text, Integer cjkSize) {
         List<String> tokens = new LinkedList<>();
         if(StringUtils.isEmpty(text)) {
             return tokens;
@@ -21,12 +25,16 @@ public class SimpleTokenizer {
         for(int i = 0; i < text.length(); i++) {
             char c = textLowerCase.charAt(i);
             if(isCJK(c)) {
-
+                flushWordBuffer(wordRun, tokens);
+                cjkRun.append(c);
             }else {
-
+                flushCjkBuffer(cjkRun, tokens, cjkSize);
+                wordRun.append(c);
             }
         }
-        return null;
+        flushCjkBuffer(cjkRun, tokens, cjkSize);
+        flushWordBuffer(wordRun, tokens);
+        return tokens;
     }
 
     private static boolean isCJK(char word) {
@@ -38,16 +46,26 @@ public class SimpleTokenizer {
                 || block == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS;
     }
 
-    private static void flushCjkBuffer(StringBuilder cjkBuffer, List<String> token, Integer cjkSize) {
+    private static void flushCjkBuffer(StringBuilder cjkBuffer, List<String> tokens, Integer cjkSize) {
         if(cjkBuffer.isEmpty()) {
             return;
         }
-        if(cjkBuffer.length() <= cjkSize) {
-            token.add(cjkBuffer.toString());
-        }else {
-            for(int i = 0; i < cjkBuffer.length(); i++) {
-                token.add(cjkBuffer.substring(i, i + cjkSize));
+        int length = cjkBuffer.length();
+        if(length > cjkSize) {
+            for(int i = 0; (i + cjkSize) <= length; i++) {
+                tokens.add(cjkBuffer.substring(i, Math.min(i + cjkSize, length)));
             }
+        }else {
+            tokens.add(cjkBuffer.toString());
         }
+        cjkBuffer.setLength(0);
+    }
+
+    private static void flushWordBuffer(StringBuilder wordBuffer, List<String> tokens) {
+        if(wordBuffer.isEmpty()) {
+            return;
+        }
+        tokens.add(wordBuffer.toString());
+        wordBuffer.setLength(0);
     }
 }

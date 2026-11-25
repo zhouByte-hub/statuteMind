@@ -14,5 +14,7 @@ public class ChunkResult {
     private String sectionPath;
     private Integer page;
     private Integer position;
+    private String title;
+    private String sourceFilename;
 
 }

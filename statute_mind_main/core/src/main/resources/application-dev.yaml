@@ -1,0 +1,22 @@
+scorpio:
+  rust-fs:
+    endpoint: http://localhost:9000
+    access-key: rustFs
+    secret-key: rustFs
+    bucket-name: statute_mind
+    region: us-east-1
+  import:
+    support:
+      - md
+      - markdown
+      - docx
+      - xlsx
+      - xlsm
+      - pdf
+    import-file-size: 10
+  chunk:
+    chunk-size: 500
+    overlap: 50
+    max-table-chars: 6000
+    semantic: false
+    cjk-size: 3

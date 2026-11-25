@@ -11,11 +11,10 @@ import java.util.Map;
 @NoArgsConstructor
 public class ImportResponse {
 
-    private String docId;
+    private String chunkId;
     private String title;
     private String sourceFile;
-    private int chunkCount;
-    Map<String, Long> blockTypeCounts;
-
+//    private int chunkCount;
+    private String blockType;
 
 }

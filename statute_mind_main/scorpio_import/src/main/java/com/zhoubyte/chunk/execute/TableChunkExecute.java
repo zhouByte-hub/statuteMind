@@ -7,13 +7,15 @@ import com.zhoubyte.config.ChunkProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component("tableChunkExecute")
 @Slf4j
 public class TableChunkExecute implements ChunkExecute{
 
 
     @Override
-    public ChunkResult blockToChunk(Block block, String sectionPath, ChunkProperties properties) {
+    public List<ChunkResult> blockToChunk(Block block, String sectionPath, ChunkProperties properties) {
         return null;
     }
 

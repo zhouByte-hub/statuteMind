@@ -5,6 +5,8 @@ server:
 spring:
   application:
     name: core
+  profiles:
+    active: dev
   servlet:
     multipart:
       max-file-size: 50MB
@@ -21,20 +23,12 @@ spring:
       host: localhost
       port: 16379
       database: 0
-
-scorpio:
-  import:
-    support:
-      - md
-      - markdown
-      - docx
-      - xlsx
-      - xlsm
-      - pdf
-    import-file-size: 10
-  chunk:
-    chunk-size: 500
-    overlap: 50
-    max-table-chars: 6000
-    semantic: false
-    cjk-size: 3
+    elasticsearch:
+      repositories:
+        enabled: true
+  elasticsearch:
+    uris: http://localhost:19200
+    username: elastic
+    password: elastic
+    connection-timeout: 3s
+    socket-timeout: 30s
