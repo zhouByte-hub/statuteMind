@@ -53,4 +53,4 @@
 
 - `impeccable detect`：18 项 → **0 项**（修复：品牌蓝/按钮对比 4.3→5.4、chips hover 3.7→4.6、占位符 3.2→4.6、加载条无限循环改有限 `loadgrow`）
 - 浏览器实测 10 步全过（零 console 报错）：首页 → chip 进 SERP → 判相关行为 → 检索相关法条 → 在知识库查看（高亮）→ logo 回首页态 → 输入「网上骂人」判断 → 重新输入重置 → 模拟上传 1,286→1,288
-- 截图（Chrome headless @ 127.0.0.1:8141，桌面 1440×900 与 390px iframe 包裹法）：`.impeccable/review/` 下 home / serp / judge / library 四态 + 移动端四态
+- 截图（Chrome headless @ 127.0.0.1:8141，桌面 1440×900 与 390px iframe 包裹法）：`.impeccable/review` 下 home / serp / judge / library 四态 + 移动端四态
