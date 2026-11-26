@@ -50,7 +50,8 @@ public class ImportServiceImpl implements ImportService {
                 try {
                     return parserRouter.parse(file.getInputStream(), file.getOriginalFilename());
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    log.error("{}分块失败，{}", file.getOriginalFilename(), e.getMessage());
+                    return null;
                 }
             }, fileImportExecutor);
             futureList.add(futureItem);
@@ -59,7 +60,7 @@ public class ImportServiceImpl implements ImportService {
         CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
         List<ParsedDocument> resultList = futureList.stream().map(CompletableFuture::join).toList();
         // 分片向量化 -> 入库
-        List<ChunkEntity> list = resultList.stream().map(structureAwareChunk::chunk)
+        List<ChunkEntity> list = resultList.stream().filter(Objects::nonNull).map(structureAwareChunk::chunk)
                 .flatMap(List::stream)
                 .map(chunkResult -> {
                     String chunkId = "chunk-" + UUID.randomUUID();

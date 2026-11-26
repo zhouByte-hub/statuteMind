@@ -5,5 +5,6 @@ public enum BlockType {
     TITLE,
     TEXT,
     TABLE,
-    IMAGE;
+    IMAGE,
+    OTHER;
 }

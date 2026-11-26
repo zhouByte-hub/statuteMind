@@ -15,7 +15,8 @@
     <description>StatuteMind后端根模块</description>
     <modules>
         <module>scorpio_import</module>
-        <module>core</module>
+        <module>mind_core</module>
+        <module>mind_common</module>
     </modules>
     <packaging>pom</packaging>
 

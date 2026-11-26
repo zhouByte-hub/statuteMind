@@ -7,15 +7,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-      </profile>
-      <profile name="Annotation profile for statute_mind_main" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/Documents/repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
-        </processorPath>
-        <module name="core" />
+        <module name="mind_common" />
       </profile>
       <profile name="Annotation profile for scorpio_import" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -27,11 +19,25 @@
         </processorPath>
         <module name="scorpio_import" />
       </profile>
+      <profile name="Annotation profile for statute_mind_main" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/Documents/repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
+        </processorPath>
+        <module name="mind_core" />
+      </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="canal_data_sync" target="21" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="core" options="-parameters" />
+      <module name="canal_data_sync" options="-parameters" />
+      <module name="mind_common" options="-parameters" />
+      <module name="mind_core" options="-parameters" />
       <module name="scorpio_import" options="-parameters" />
       <module name="statute_mind_main" options="" />
     </option>
