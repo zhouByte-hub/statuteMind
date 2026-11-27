@@ -1,7 +1,7 @@
 package com.zhoubyte.core.service.common;
 
-import com.zhoubyte.common.FileStorageService;
 import com.zhoubyte.core.config.RustFsConfig;
+import com.zhoubyte.s3.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.sync.RequestBody;

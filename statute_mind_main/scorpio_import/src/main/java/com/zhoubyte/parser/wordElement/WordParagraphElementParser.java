@@ -3,7 +3,8 @@ package com.zhoubyte.parser.wordElement;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.zhoubyte.block.Block;
-import com.zhoubyte.common.FileStorageService;
+import com.zhoubyte.context.parseContext.DocumentParseContext;
+import com.zhoubyte.s3.FileStorageService;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class WordParagraphElementParser implements WordElementParser {
     }
 
     @Override
-    public List<Block> parseWordElement(IBodyElement element) {
+    public List<Block> parseWordElement(IBodyElement element, DocumentParseContext context) {
         XWPFParagraph paragraph = (XWPFParagraph) element;
         List<Block> blocks = new ArrayList<>();
         if (StringUtils.isNotEmpty(paragraph.getText())) {
@@ -79,6 +80,7 @@ public class WordParagraphElementParser implements WordElementParser {
     }
 
     private String resolveDescription(XWPFPicture picture, XWPFPictureData data) {
+        // XWPFPicture -> CTPicture(XmlBeans) -> NvPicPr(非可视化属性） -> CNvPr
         String descr = picture.getCTPicture().getNvPicPr().getCNvPr().getDescr();
         if (StringUtils.isNotEmpty(descr)) {
             return descr;

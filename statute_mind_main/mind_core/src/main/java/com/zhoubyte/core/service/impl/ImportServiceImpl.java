@@ -3,6 +3,8 @@ package com.zhoubyte.core.service.impl;
 import com.zhoubyte.block.ParsedDocument;
 import com.zhoubyte.chunk.StructureAwareChunk;
 import com.zhoubyte.config.ChunkProperties;
+import com.zhoubyte.context.ScorpioContext;
+import com.zhoubyte.context.parseContext.DocumentParseContext;
 import com.zhoubyte.core.model.ChunkEntity;
 import com.zhoubyte.core.repository.es.ChunkRepository;
 import com.zhoubyte.model.ImportResponse;
@@ -33,6 +35,7 @@ public class ImportServiceImpl implements ImportService {
     private final SparseEncoder sparseEncoder;
     private final EmbeddingModel embeddingModel;
     private final ChunkRepository chunkRepository;
+    private final ScorpioContext scorpioContext;
 
     @Override
     public List<String> supportFileExtensions() {
@@ -45,10 +48,11 @@ public class ImportServiceImpl implements ImportService {
             throw new IllegalArgumentException("单次导入最多支持"+parserRouter.importFileSize()+"个文件");
         }
         List<CompletableFuture<ParsedDocument>> futureList = new ArrayList<>();
+        DocumentParseContext documentParseContext = scorpioContext.getDocumentParseContext();
         for (MultipartFile file : fileList) {
             CompletableFuture<ParsedDocument> futureItem = CompletableFuture.supplyAsync(() -> {
                 try {
-                    return parserRouter.parse(file.getInputStream(), file.getOriginalFilename());
+                    return parserRouter.parse(file.getInputStream(), file.getOriginalFilename(), documentParseContext);
                 } catch (IOException e) {
                     log.error("{}分块失败，{}", file.getOriginalFilename(), e.getMessage());
                     return null;

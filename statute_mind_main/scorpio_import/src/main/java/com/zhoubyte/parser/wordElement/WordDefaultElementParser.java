@@ -2,6 +2,7 @@ package com.zhoubyte.parser.wordElement;
 
 
 import com.zhoubyte.block.Block;
+import com.zhoubyte.context.parseContext.DocumentParseContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.IBodyElement;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -22,7 +23,7 @@ public class WordDefaultElementParser implements WordElementParser{
     }
 
     @Override
-    public List<Block> parseWordElement(IBodyElement element) {
+    public List<Block> parseWordElement(IBodyElement element, DocumentParseContext context) {
         String text = ((XWPFParagraph) element).getText();
         return Collections.singletonList(Block.text(text, null));
     }

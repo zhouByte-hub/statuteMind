@@ -1,4 +1,4 @@
-package com.zhoubyte.common;
+package com.zhoubyte.s3;
 
 public interface FileStorageService {
 

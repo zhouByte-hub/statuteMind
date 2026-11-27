@@ -17,6 +17,7 @@
         <module>scorpio_import</module>
         <module>mind_core</module>
         <module>mind_common</module>
+        <module>sync_broker_redis</module>
     </modules>
     <packaging>pom</packaging>
 

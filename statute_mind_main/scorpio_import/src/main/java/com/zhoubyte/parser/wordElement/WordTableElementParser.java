@@ -1,6 +1,7 @@
 package com.zhoubyte.parser.wordElement;
 
 import com.zhoubyte.block.Block;
+import com.zhoubyte.context.parseContext.DocumentParseContext;
 import com.zhoubyte.utils.MarkdownUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.IBodyElement;
@@ -21,7 +22,7 @@ public class WordTableElementParser implements WordElementParser{
     }
 
     @Override
-    public List<Block> parseWordElement(IBodyElement element) {
+    public List<Block> parseWordElement(IBodyElement element, DocumentParseContext context) {
         XWPFTable table = (XWPFTable) element;
         List<String> tableTitle = new LinkedList<>();
         List<List<String>> rows = new LinkedList<>();

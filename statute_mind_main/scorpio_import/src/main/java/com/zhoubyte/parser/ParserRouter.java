@@ -2,6 +2,9 @@ package com.zhoubyte.parser;
 
 import com.zhoubyte.block.ParsedDocument;
 import com.zhoubyte.config.ImportProperties;
+import com.zhoubyte.context.ScorpioContext;
+import com.zhoubyte.context.parseContext.DocumentParseContext;
+import com.zhoubyte.context.parseContext.DocumentParseStep;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +32,7 @@ public class ParserRouter {
         return importProperties.getImportFileSize();
     }
 
-    public ParsedDocument parse(InputStream inputStream, String filename) throws IOException {
+    public ParsedDocument parse(InputStream inputStream, String filename, DocumentParseContext context) throws IOException {
         byte[] data = inputStream.readAllBytes();
         if(StringUtils.isEmpty(filename)) {
             throw new RuntimeException("导入的文件未解析到文件名");
@@ -44,10 +47,11 @@ public class ParserRouter {
         if(parserList.isEmpty()) {
             throw new RuntimeException("暂不支持解析[" + extension + "]格式文件");
         }
+        DocumentParseStep parseStep = context.initParseStep(filename, "路由选择解析器");
         Exception parserException;
         try{
             for (DocumentParser documentParser : parserList) {
-                ParsedDocument parse = documentParser.parse(data, filename);
+                ParsedDocument parse = documentParser.parse(data, filename, context);
                 if(parse != null && !parse.getBlocks().isEmpty()) {
                     log.info("{}解析成功，分块长度：{}", filename, parse.getBlocks().size());
                     return parse;

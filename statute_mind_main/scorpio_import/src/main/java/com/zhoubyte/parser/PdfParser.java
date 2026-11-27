@@ -1,6 +1,7 @@
 package com.zhoubyte.parser;
 
 import com.zhoubyte.block.ParsedDocument;
+import com.zhoubyte.context.parseContext.DocumentParseContext;
 import org.springframework.stereotype.Component;
 
 @Component("pdfParser")
@@ -12,7 +13,7 @@ public class PdfParser implements DocumentParser{
     }
 
     @Override
-    public ParsedDocument parse(byte[] documentData, String filename) {
+    public ParsedDocument parse(byte[] documentData, String filename, DocumentParseContext context) {
         return null;
     }
 }
