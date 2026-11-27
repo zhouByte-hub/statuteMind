@@ -3,14 +3,15 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.zhoubyte</groupId>
-        <artifactId>statute_mind_main</artifactId>
+        <artifactId>statute-mind-main</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>mind_common</artifactId>
+    <artifactId>sync_broker_redis</artifactId>
     <packaging>jar</packaging>
+    <description>使用Redis的消息队列来实现数据库与ES的数据同步</description>
 
-    <name>mind_common</name>
+    <name>sync_broker_redis</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -20,19 +21,12 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>s3</artifactId>
-            <version>2.59.8</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
         </dependency>
     </dependencies>
 </project>

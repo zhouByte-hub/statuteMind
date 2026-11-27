@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.zhoubyte</groupId>
-    <artifactId>statute_mind_main</artifactId>
+    <artifactId>statute-mind-main</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>statute_mind_main</name>
     <description>StatuteMind后端根模块</description>
