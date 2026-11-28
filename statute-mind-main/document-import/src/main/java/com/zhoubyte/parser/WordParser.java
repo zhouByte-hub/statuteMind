@@ -37,7 +37,7 @@ public class WordParser implements DocumentParser{
 
     @Override
     public ParsedDocument parse(byte[] documentData, String filename, DocumentParseContext context) {
-        DocumentParseStep parseStep = context.initParseStep(filename, "Word解析器解析文档");
+        context.addStep(filename, "Word解析器解析文档", false);
         List<Block> wordBlockResult = new LinkedList<>();
         try(XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(documentData))) {
             for (IBodyElement bodyElement : document.getBodyElements()) {

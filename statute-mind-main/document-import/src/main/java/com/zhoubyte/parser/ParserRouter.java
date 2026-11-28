@@ -47,7 +47,8 @@ public class ParserRouter {
         if(parserList.isEmpty()) {
             throw new RuntimeException("暂不支持解析[" + extension + "]格式文件");
         }
-        DocumentParseStep parseStep = context.initParseStep(filename, "路由选择解析器");
+        // 初始化导入上下文对象
+        context.initParseStep(filename, "路由选择解析器");
         Exception parserException;
         try{
             for (DocumentParser documentParser : parserList) {

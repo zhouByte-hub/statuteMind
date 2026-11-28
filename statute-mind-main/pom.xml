@@ -11,13 +11,13 @@
     <groupId>com.zhoubyte</groupId>
     <artifactId>statute-mind-main</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>statute_mind_main</name>
+    <name>statute-mind-main</name>
     <description>StatuteMind后端根模块</description>
     <modules>
-        <module>scorpio_import</module>
-        <module>mind_core</module>
-        <module>mind_common</module>
-        <module>sync_broker_redis</module>
+        <module>document-import</module>
+        <module>mind-core</module>
+        <module>mind-common</module>
+        <module>sync-broker-redis</module>
     </modules>
     <packaging>pom</packaging>
 

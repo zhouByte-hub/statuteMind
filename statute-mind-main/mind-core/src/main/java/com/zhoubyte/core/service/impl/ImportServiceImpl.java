@@ -6,7 +6,6 @@ import com.zhoubyte.config.ChunkProperties;
 import com.zhoubyte.context.ScorpioContext;
 import com.zhoubyte.context.parseContext.DocumentParseContext;
 import com.zhoubyte.core.model.ChunkEntity;
-import com.zhoubyte.core.repository.es.ChunkRepository;
 import com.zhoubyte.model.ImportResponse;
 import com.zhoubyte.core.service.ImportService;
 import com.zhoubyte.parser.ParserRouter;
@@ -34,7 +33,6 @@ public class ImportServiceImpl implements ImportService {
     private final ChunkProperties chunkProperties;
     private final SparseEncoder sparseEncoder;
     private final EmbeddingModel embeddingModel;
-    private final ChunkRepository chunkRepository;
     private final ScorpioContext scorpioContext;
 
     @Override
@@ -43,7 +41,8 @@ public class ImportServiceImpl implements ImportService {
     }
 
     @Override
-    public List<ImportResponse> importFile(List<MultipartFile> fileList) {
+    public List<ImportResponse> importFile(List<MultipartFile> fileList, String ip) {
+        // todo 判断当前用户是否存在导入任务
         if(fileList.size() > parserRouter.importFileSize()) {
             throw new IllegalArgumentException("单次导入最多支持"+parserRouter.importFileSize()+"个文件");
         }
@@ -87,8 +86,8 @@ public class ImportServiceImpl implements ImportService {
                     chunkEntity.setEmbedding(chunkEmbed);
                     return chunkEntity;
                 }).toList();
-        // 批量入库
-        chunkRepository.saveAll(list);
+        // todo 批量入库
+
         // 返回导入结果
         return list.stream().map(entity -> {
             return new ImportResponse(entity.getChunkId(), entity.getTitle(), entity.getSourceFile(), entity.getBlockType());

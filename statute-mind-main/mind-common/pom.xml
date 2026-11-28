@@ -7,10 +7,10 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>mind_common</artifactId>
+    <artifactId>mind-common</artifactId>
     <packaging>jar</packaging>
 
-    <name>mind_common</name>
+    <name>mind-common</name>
     <url>http://maven.apache.org</url>
 
     <properties>

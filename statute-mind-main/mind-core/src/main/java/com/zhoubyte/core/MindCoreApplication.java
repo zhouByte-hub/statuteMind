@@ -6,10 +6,10 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication(scanBasePackages = "com.zhoubyte")
 @ConfigurationPropertiesScan(basePackages = "com.zhoubyte")
-public class CoreApplication {
+public class MindCoreApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CoreApplication.class, args);
+        SpringApplication.run(MindCoreApplication.class, args);
     }
 
 }

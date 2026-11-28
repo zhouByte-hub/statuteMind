@@ -11,6 +11,11 @@ spring:
     multipart:
       max-file-size: 50MB
       max-request-size: 500MB
+  datasource:
+    url: jdbc:mysql://127.0.0.1:13306/statuteMind?serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
   ai:
     ollama:
       base-url: http://localhost:11434
@@ -23,12 +28,10 @@ spring:
       host: localhost
       port: 16379
       database: 0
-    elasticsearch:
-      repositories:
-        enabled: true
+      password: 123456
   elasticsearch:
     uris: http://localhost:19200
-    username: elastic
-    password: elastic
+#    username: elastic
+#    password: elastic
     connection-timeout: 3s
     socket-timeout: 30s

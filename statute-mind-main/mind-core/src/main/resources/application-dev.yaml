@@ -1,8 +1,8 @@
 scorpio:
   rust-fs:
-    endpoint: http://localhost:9000
-    access-key: rustFs
-    secret-key: rustFs
+    endpoint: http://localhost:19000
+    access-key: rustfs
+    secret-key: rustfsadmin
     bucket-name: statute_mind
     region: us-east-1
   import:

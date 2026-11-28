@@ -7,11 +7,11 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>sync_broker_redis</artifactId>
+    <artifactId>sync-broker-redis</artifactId>
     <packaging>jar</packaging>
     <description>使用Redis的消息队列来实现数据库与ES的数据同步</description>
 
-    <name>sync_broker_redis</name>
+    <name>sync-broker-redis</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -25,8 +25,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+            <groupId>co.elastic.clients</groupId>
+            <artifactId>elasticsearch-java</artifactId>
+            <version>8.18.8</version>
         </dependency>
     </dependencies>
 </project>

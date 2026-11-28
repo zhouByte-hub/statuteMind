@@ -10,7 +10,7 @@ public interface ImportService {
 
     List<String> supportFileExtensions();
 
-    List<ImportResponse> importFile(List<MultipartFile> fileList);
+    List<ImportResponse> importFile(List<MultipartFile> fileList, String ip);
 
 
 }

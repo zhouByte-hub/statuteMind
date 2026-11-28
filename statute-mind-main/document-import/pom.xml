@@ -7,10 +7,10 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>scorpio_import</artifactId>
+    <artifactId>document-import</artifactId>
     <packaging>jar</packaging>
 
-    <name>scorpio_import</name>
+    <name>document-import</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -59,7 +59,7 @@
 
         <dependency>
             <groupId>com.zhoubyte</groupId>
-            <artifactId>mind_common</artifactId>
+            <artifactId>mind-common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
